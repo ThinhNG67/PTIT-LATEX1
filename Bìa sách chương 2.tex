@@ -1,0 +1,153 @@
+% !TEX program = lualatex
+% ========================================================
+% BÌA SÁNG — GIÁO TRÌNH TỰ HỌC GIẢI TÍCH 1  (ngôn ngữ chung cho 4 chương)
+% Mỗi tập sửa: MÀU RIÊNG, THÔNG TIN TẬP, HÌNH TRONG THẺ, CHIP
+% ========================================================
+\documentclass[a4paper]{article}
+\usepackage[margin=0pt]{geometry}
+\usepackage{fontspec}
+\usepackage{amsmath,amssymb}
+\usepackage{xcolor}
+\usepackage{tikz}
+\usetikzlibrary{calc}
+
+% ---- MÀU RIÊNG CỦA TẬP (chương 2: cam đất)
+\definecolor{maincolor}{HTML}{C2410C}
+\definecolor{darkmain}{HTML}{7C2D12}
+\definecolor{cream}{HTML}{FFF7ED}
+\definecolor{covline}{HTML}{FED7AA}
+% ---- MÀU DÙNG CHUNG CẢ 4 TẬP
+\definecolor{badgecolor}{HTML}{F59E0B}
+\definecolor{infocolor}{HTML}{1E3A8A}
+\definecolor{chippink}{HTML}{BE185D}
+\definecolor{chipteal}{HTML}{0F766E}
+\definecolor{chipgold}{HTML}{A16207}
+\definecolor{newcolor}{HTML}{6D28D9}
+
+\newif\ifusemontserrat
+\usemontserrattrue
+\ifusemontserrat
+  \newfontfamily\cvfont{Montserrat}[Ligatures=TeX]
+\else
+  \newfontfamily\cvfont{Latin Modern Sans}[Ligatures=TeX]
+\fi
+\newcommand{\spaced}[1]{{\addfontfeature{LetterSpace=18}#1}}
+\newcommand{\szXS}{\fontsize{8}{8}\selectfont}
+
+% ---- THÔNG TIN TẬP
+\newcommand{\bookname}{GIẢI TÍCH 1}
+\newcommand{\volnum}{02}
+\newcommand{\chapnum}{2}
+\newcommand{\chapA}{HÀM SỐ}
+\newcommand{\chapB}{MỘT BIẾN SỐ}
+\newcommand{\tacgia}{Nhật Thịnh}
+\newcommand{\subtitle}{Tài liệu tự học, tổng hợp từ giáo trình TS.Vũ Gia Tê và các nguồn khác}
+
+% ---- chip
+\tikzset{chip/.style={rounded corners=2.2mm, inner xsep=2.7mm, inner ysep=1.5mm,
+  font={\cvfont\fontsize{10}{10}\selectfont}, anchor=west, line width=0.4pt}}
+\newcommand{\chip}[4]{%
+  \node[chip, fill=#2!10, draw=#2!45, text=#2] (#1) at #3 {#4};}
+\newcommand{\chipnext}[4]{%
+  \node[chip, fill=#2!10, draw=#2!45, text=#2] (#1) at ($(#3.east)+(2.6,0)$) {#4};}
+
+\newcommand{\makecover}{%
+\thispagestyle{empty}%
+\begin{tikzpicture}[remember picture, overlay,
+  shift={(current page.south west)}, x=1mm, y=1mm]
+
+  % ---- nền kem
+  \fill[cream] (0,0) rectangle (210,297);
+
+  % ---- KHỐI MÀU nửa trên
+  \fill[maincolor] (0,150) rectangle (210,297);
+  \begin{scope}
+    \clip (0,150) rectangle (210,297);
+    \fill[white, opacity=0.08] (205,292) circle (75);
+    \fill[white, opacity=0.06] (-10,150) circle (45);
+  \end{scope}
+  \fill[badgecolor] (186,268) circle (5);
+
+  % số chương khổng lồ
+  \node[anchor=east, text=white, opacity=0.32,
+        font=\cvfont\bfseries\fontsize{230}{230}\selectfont]
+    at (190,222) {\chapnum};
+
+  % ---- thanh trên: nhãn tập + tên sách
+  \node[anchor=west, fill=white, text=maincolor, rounded corners=3mm,
+        inner xsep=4.5mm, inner ysep=2mm, font=\cvfont\bfseries\footnotesize]
+    at (18,281) {\spaced{TẬP \volnum}};
+  \node[anchor=west, text=white, font=\cvfont\bfseries\footnotesize]
+    at (52,281) {\spaced{GIÁO TRÌNH TỰ HỌC \ -- \ \bookname}};
+
+  % ---- chương + tên chương
+  \node[anchor=west, fill=badgecolor, text=darkmain, rounded corners=3mm,
+        inner xsep=5mm, inner ysep=2.2mm, font=\cvfont\bfseries\normalsize]
+    at (18,257) {\spaced{CHƯƠNG \chapnum}};
+  \node[anchor=west, text=white, font=\cvfont\bfseries\fontsize{54}{54}\selectfont]
+    at (16.5,233) {\chapA};
+  \node[anchor=west, text=white, font=\cvfont\bfseries\fontsize{34}{34}\selectfont]
+    at (16.5,210) {\chapB};
+  \fill[badgecolor] (18,194) rectangle (46,195.4);
+
+  % ---- THẺ MINH HOẠ: đè lên ranh giới khối màu
+  \fill[black, opacity=0.08, rounded corners=4mm] (19.5,78.5) rectangle (193.5,172.5);
+  \fill[white, draw=covline, line width=0.5pt, rounded corners=4mm] (18,80) rectangle (192,172);
+
+  \begin{scope}[shift={(36,98)}]
+    \foreach \gx in {35,70,105,140}{
+      \draw[covline, line width=0.3pt] (\gx,0) -- (\gx,66);
+    }
+    \foreach \gy in {15,30,45,60}{
+      \draw[covline, line width=0.3pt] (0,\gy) -- (143,\gy);
+    }
+    % vùng ε–δ quanh (a, l) = (85, 28.05)
+    \fill[maincolor, opacity=0.10] (71,19.05) rectangle (99,37.05);
+    \draw[badgecolor, dashed, line width=0.4pt] (71,19.05) rectangle (99,37.05);
+    \draw[->, maincolor, line width=0.7pt] (0,0) -- (146,0);
+    \draw[->, maincolor, line width=0.7pt] (0,0) -- (0,67);
+    \draw[infocolor, opacity=0.35, line width=0.7pt, domain=0:140, samples=80, smooth]
+      plot (\x, {36+12*sin(\x*3.2)});
+    \draw[maincolor, line width=1.3pt, domain=0:140, samples=60, smooth]
+      plot (\x, {0.16*\x+0.002*\x*\x});
+    \draw[badgecolor, dashed, line width=0.5pt] (85,0) -- (85,28.05);
+    \draw[badgecolor, dashed, line width=0.5pt] (0,28.05) -- (85,28.05);
+    \fill[white] (85,28.05) circle (1.8);
+    \draw[maincolor, line width=0.9pt] (85,28.05) circle (1.8);
+    \node[text=maincolor, font=\cvfont\bfseries\footnotesize] at (85,-3.5) {$a$};
+    \node[text=maincolor, font=\cvfont\bfseries\footnotesize, anchor=east] at (-1.5,28.05) {$l$};
+    \node[text=infocolor, font=\cvfont\scriptsize, anchor=east] at (-1.5,37.05) {$l{+}\varepsilon$};
+    \node[text=infocolor, font=\cvfont\scriptsize, anchor=east] at (-1.5,19.05) {$l{-}\varepsilon$};
+    \node[text=maincolor, font=\cvfont\bfseries\footnotesize, anchor=west] at (118,60) {$f(x)$};
+  \end{scope}
+
+  \node[text=maincolor, font=\cvfont\small] at (105,86)
+    {$\displaystyle\lim_{x\to a}f(x)=l\ \ \textnormal{và}\ \ f(a)=l\ \Rightarrow\ \textnormal{liên tục}$};
+
+  % ---- chip nội dung (8 chip)
+  \node[anchor=west, text=maincolor!70, font={\cvfont\bfseries\szXS}]
+    at (18,67) {\spaced{TRONG CHƯƠNG NÀY BẠN SẼ GẶP}};
+  \chip{c1}{maincolor}{(18,57)}{hàm sơ cấp}
+  \chipnext{c2}{infocolor}{c1}{hypebôlic}
+  \chipnext{c3}{chippink}{c2}{$\arcsin$, $\arccos$}
+  \chipnext{c4}{chipteal}{c3}{giới hạn hàm}
+  \chip{c5}{newcolor}{(18,45.5)}{VCB -- VCL}
+  \chipnext{c6}{chipgold}{c5}{$\frac{\sin x}{x}\to 1$}
+  \chipnext{c7}{infocolor}{c6}{liên tục}
+  \chipnext{c8}{chippink}{c7}{Heine}
+
+  % ---- chân trang SÁNG: viên thuốc tác giả màu chủ đạo
+  \draw[covline, line width=0.5pt] (18,31) -- (192,31);
+  \node[anchor=west, fill=maincolor, rounded corners=2.2mm, text=white,
+        inner xsep=5mm, inner ysep=3mm, font=\cvfont\bfseries\large]
+    at (18,20) {Biên soạn: \tacgia};
+  \fill[badgecolor] (186,20) circle (4);
+  \node[anchor=west, text=darkmain, font=\cvfont\itshape\scriptsize]
+    at (18,7) {\subtitle};
+
+\end{tikzpicture}%
+\newpage}
+
+\begin{document}
+\makecover
+\end{document}
