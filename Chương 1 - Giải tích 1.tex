@@ -1,0 +1,3018 @@
+% !TEX program = lualatex
+%% =====================================================================
+%%  GIẢI TÍCH 1 - CHƯƠNG 1: GIỚI HẠN CỦA DÃY SỐ  dùng lualatex hoặc xelatex(nếu dùng overleaf)
+%% =====================================================================
+\documentclass[11pt, a4paper, twoside]{article}
+\usepackage[a4paper, margin=1.8cm, top=1.6cm, bottom=2.4cm]{geometry}
+\usepackage{fontspec}
+\usepackage[english, vietnamese, bidi=basic, provide=*]{babel}
+\babelprovide[import, onchar=ids fonts]{vietnamese}
+
+\IfFontExistsTF{Montserrat-Regular.otf}{%
+  \babelfont{rm}[
+    Extension      = .otf,
+    UprightFont    = *-Regular,
+    BoldFont       = *-Bold,
+    ItalicFont     = *-Italic,
+    BoldItalicFont = *-BoldItalic
+  ]{Montserrat}%
+  \newfontfamily\cvfont[
+    Extension      = .otf,
+    UprightFont    = *-Regular,
+    BoldFont       = *-Bold,
+    ItalicFont     = *-Italic,
+    BoldItalicFont = *-BoldItalic,
+    Ligatures      = TeX
+  ]{Montserrat}%
+}{%
+  \babelfont{rm}{Latin Modern Roman}%
+  \newfontfamily\cvfont{Latin Modern Sans}[Ligatures=TeX]%
+}
+
+\usepackage{amsmath, amssymb}
+\usepackage{tikz}
+\usetikzlibrary{shapes, arrows.meta, calc, decorations.pathreplacing}
+\usepackage{enumitem}
+\usepackage[table]{xcolor}
+\usepackage{fancyhdr}
+\usepackage{tabularx}
+\usepackage{array}
+\usepackage{tcolorbox}
+\tcbuselibrary{skins, breakable}
+\usepackage{tocloft}
+
+\setlength{\parindent}{0pt}
+\setlength{\parskip}{4pt}
+\linespread{1.12}
+\setcounter{tocdepth}{3}
+
+% --------------------------------------------------------
+% MÀU SẮC
+% --------------------------------------------------------
+\definecolor{maincolor}{HTML}{0D5C3A}
+\definecolor{lightmain}{HTML}{F0FDF4}
+\definecolor{anscolor}{HTML}{B91C1C}
+\definecolor{badgecolor}{HTML}{D97706}
+\definecolor{infocolor}{HTML}{1D4ED8}
+\definecolor{newcolor}{HTML}{7C3AED}
+% màu riêng cho cái bìa
+\definecolor{covmint}{HTML}{E3F3E8}
+\definecolor{covline}{HTML}{C5DFCF}
+\definecolor{chipteal}{HTML}{0E7490}
+\definecolor{chippink}{HTML}{BE185D}
+\definecolor{chipgold}{HTML}{A16207}
+
+\newcommand{\tacgia}{Nhật Thịnh - N26DCCN273}
+\newcolumntype{L}{>{\raggedright\arraybackslash}X}
+
+% --------------------------------------------------------
+% KÝ HIỆU TOÁN HỌC
+% --------------------------------------------------------
+\newcommand{\NN}{\mathbb{N}}
+\newcommand{\Ns}{\mathbb{N}^{\ast}}
+\newcommand{\ZZ}{\mathbb{Z}}
+\newcommand{\QQ}{\mathbb{Q}}
+\newcommand{\RR}{\mathbb{R}}
+\newcommand{\CC}{\mathbb{C}}
+\newcommand{\RRb}{\overline{\mathbb{R}}}
+\newcommand{\eps}{\varepsilon}
+\newcommand{\cj}[1]{\overline{#1}}
+\newcommand{\Rez}{\operatorname{Re}}
+\newcommand{\Imz}{\operatorname{Im}}
+\DeclareMathOperator{\Arg}{Arg}
+\newcommand{\limn}{\lim_{n\to\infty}}
+\newcommand{\un}{(u_n)}
+\newcommand{\EE}{\operatorname{E}}
+\newcommand{\limx}[1]{\lim_{x\to #1}}
+\DeclareMathOperator{\tg}{tg}
+\DeclareMathOperator{\cotg}{cotg}
+\DeclareMathOperator{\sh}{sh}
+\DeclareMathOperator{\ch}{ch}
+\DeclareMathOperator{\thh}{th}
+\DeclareMathOperator{\cth}{coth}
+\DeclareMathOperator{\arctg}{arctg}
+\DeclareMathOperator{\arccotg}{arccotg}
+\DeclareMathOperator{\Argsh}{Argsh}
+\DeclareMathOperator{\Argch}{Argch}
+\DeclareMathOperator{\Argth}{Argth}
+\DeclareMathOperator{\sgn}{sgn}
+\renewcommand{\Re}{\operatorname{Re}}
+\renewcommand{\Im}{\operatorname{Im}}
+
+% --------------------------------------------------------
+% NHÃN (BADGE) NHỎ  -- ẩn trong mục lục
+% --------------------------------------------------------
+\newif\ifintoc
+\DeclareRobustCommand{\badge}[2]{\ifintoc\else\tikz[baseline=(b.base)]\node[fill=#1, text=white, rounded corners=2pt, inner xsep=4pt, inner ysep=2pt, font=\scriptsize\bfseries](b){#2};\fi}
+\DeclareRobustCommand{\tagmoi}{\badge{newcolor}{MỚI}}
+\DeclareRobustCommand{\tagkho}{\badge{anscolor}{KHÓ}}
+\DeclareRobustCommand{\tagde}{\badge{maincolor}{DỄ}}
+\DeclareRobustCommand{\tagnho}{\badge{maincolor}{GHI NHỚ}}
+\DeclareRobustCommand{\taghieu}{\badge{infocolor}{HIỂU Ý}}
+\DeclareRobustCommand{\tagluu}{\badge{badgecolor}{LƯU Ý}}
+\DeclareRobustCommand{\tagthu}{\badge{badgecolor}{THỬ SỨC}}
+
+% --------------------------------------------------------
+% TIÊU ĐỀ BÀI / PHẦN / MỤC (có đưa vào mục lục)
+% --------------------------------------------------------
+\newcounter{phan}
+\makeatletter
+\newcommand{\resetvd}{\setcounter{tcb@cnt@vd}{0}}
+\makeatother
+
+% \bai{tiêu đề trong mục lục}{tiêu đề lớn}{dòng phụ}
+\newcommand{\bai}[3]{%
+  \clearpage\setcounter{phan}{0}\resetvd
+  \addcontentsline{toc}{section}{#1}%
+  \noindent
+  \begin{tikzpicture}
+    \path[fill=maincolor]     (0, 0)   -- (0.5, 0) -- (0.3, -0.3) -- (-0.2, -0.3) -- cycle;
+    \path[fill=maincolor!75]  (0.6, 0) -- (1.1, 0) -- (0.9, -0.3) -- (0.4, -0.3) -- cycle;
+    \path[fill=maincolor!50]  (1.2, 0) -- (1.7, 0) -- (1.5, -0.3) -- (1.0, -0.3) -- cycle;
+    \path[fill=maincolor!25]  (1.8, 0) -- (2.3, 0) -- (2.1, -0.3) -- (1.6, -0.3) -- cycle;
+    \draw[maincolor, thick] (2.6, -0.15) -- ({\textwidth-4.6cm}, -0.15);
+    \node[fill=maincolor, text=white, font=\bfseries, rounded corners=3pt, inner sep=5pt, anchor=east]
+      at (\textwidth, -0.15) {Biên soạn: \tacgia};
+  \end{tikzpicture}
+
+  \vspace{0.5cm}
+  \begin{center}
+    {\small\bfseries\color{maincolor} HỌC PHẦN GIẢI TÍCH 1 \,·\, CHƯƠNG 1}\\[4pt]
+    {\Large\bfseries\color{maincolor} #2}\\[4pt]
+    {\small\itshape #3}
+  \end{center}
+  \vspace{0.2cm}
+  {\color{maincolor}\rule{\textwidth}{1.2pt}}
+  \vspace{0.1cm}\par}
+
+\newcommand{\phan}[1]{%
+  \refstepcounter{phan}\par\vspace{0.45cm}\noindent
+  \addcontentsline{toc}{subsection}{PHẦN \Alph{phan}.\ #1}%
+  \begin{tikzpicture}
+    \node[fill=maincolor, text=white, rounded corners=3pt, inner xsep=9pt, inner ysep=5pt, font=\bfseries\large, anchor=south west](n) at (0,0) {PHẦN \Alph{phan}};
+    \node[text=maincolor, font=\bfseries\Large, anchor=south west] at ([xshift=9pt]n.south east) {#1};
+    \draw[maincolor, thick] ([yshift=-3pt]n.south west) -- ++(\textwidth,0);
+  \end{tikzpicture}\par\nobreak\vspace{0.15cm}}
+
+\newcommand{\muc}[2]{%
+  \par\vspace{7pt}\noindent
+  \addcontentsline{toc}{subsubsection}{#1\quad #2}%
+  {\color{maincolor}\rule[-2pt]{4pt}{13pt}}\hspace{5pt}%
+  \textbf{\color{maincolor!90!black}\large #1\quad #2}\par\nobreak\vspace{3pt}}
+
+% Tiêu đề trong phần đáp án
+\newcommand{\dapanbai}[1]{%
+  \par\vspace{0.5cm}\noindent
+  \addcontentsline{toc}{subsection}{#1}%
+  \begin{tikzpicture}
+    \node[fill=maincolor, text=white, rounded corners=3pt, inner xsep=9pt, inner ysep=5pt, font=\bfseries\large, anchor=south west](n) at (0,0) {#1};
+    \draw[maincolor, thick] ([yshift=-3pt]n.south west) -- ++(\textwidth,0);
+  \end{tikzpicture}\par\nobreak\vspace{0.2cm}}
+\newcommand{\dapanphan}[1]{%
+  \addcontentsline{toc}{subsubsection}{Đáp án Phần #1}%
+  \textbf{\color{maincolor}Phần #1}}
+
+% --------------------------------------------------------
+% CÁC HỘP NỘI DUNG
+% --------------------------------------------------------
+\tcbset{bx/.style={enhanced, breakable, arc=4pt, boxrule=0.9pt, coltitle=white,
+  fonttitle=\bfseries\small, toptitle=2pt, bottomtitle=2pt,
+  left=9pt, right=9pt, top=6pt, bottom=6pt, before skip=8pt, after skip=8pt}}
+
+\newtcolorbox{dn}[1]{bx, colback=lightmain, colframe=maincolor,
+  title={ĐỊNH NGHĨA \enspace #1}}
+\newtcolorbox{tc}[1]{bx, colback=white, colframe=maincolor!85!black,
+  title={TÍNH CHẤT / ĐỊNH LÝ \enspace #1}}
+\newtcolorbox[auto counter]{vd}[1]{bx, colback=white, colframe=infocolor!80!black,
+  title={VÍ DỤ \thetcbcounter \enspace #1}}
+\newtcolorbox{ly}{bx, colback=badgecolor!8, colframe=badgecolor,
+  title={LƯU Ý}}
+\newtcolorbox{hy}[1][HIỂU Ý]{bx, colback=infocolor!6, colframe=infocolor,
+  title={#1}}
+\newtcolorbox{ts}{bx, colback=white, colframe=badgecolor, colbacktitle=badgecolor,
+  title={THỬ SỨC \enspace (làm trước, rồi mới xem đáp án ở cuối sách)}}
+
+\newcommand{\bt}[1]{\textbf{\color{badgecolor}#1}}
+\newcommand{\ans}[1]{\par\vspace{3pt}\noindent\textbf{\color{anscolor}#1}\ }
+
+% --------------------------------------------------------
+% MỤC LỤC (tocloft)
+% --------------------------------------------------------
+\renewcommand{\cfttoctitlefont}{\Large\bfseries\color{maincolor}}
+\renewcommand{\cftsecfont}{\bfseries\color{maincolor}}
+\renewcommand{\cftsecpagefont}{\bfseries\color{maincolor}}
+\renewcommand{\cftsecleader}{\cftdotfill{\cftdotsep}}
+\renewcommand{\cftsubsecfont}{\bfseries}
+\renewcommand{\cftsubsecpagefont}{\bfseries}
+\renewcommand{\cftsubsubsecfont}{\small}
+\renewcommand{\cftsubsubsecpagefont}{\small}
+\setlength{\cftbeforesecskip}{9pt}
+\setlength{\cftbeforesubsecskip}{3pt}
+\setlength{\cftbeforesubsubsecskip}{0pt}
+\setlength{\cftsecindent}{0pt}
+\setlength{\cftsubsecindent}{1.2em}
+\setlength{\cftsubsubsecindent}{2.8em}
+
+% --------------------------------------------------------
+% HEADER & FOOTER
+% --------------------------------------------------------
+\pagestyle{fancy}
+\fancyhf{}
+\renewcommand{\headrulewidth}{0pt}
+\renewcommand{\footrulewidth}{0pt}
+\newcommand{\fpage}{\ifnum\value{page}<10 0\fi\thepage}
+\fancyfoot[RO]{%
+  \begin{tikzpicture}
+    \shade[left color=white, right color=maincolor!20, rounded corners=3pt] (0,0) rectangle (2.2, 0.65);
+    \node[text=maincolor, font=\bfseries\Large] at (1.5, 0.32) {\fpage \hspace{2pt} \rule[-2pt]{1.2pt}{12pt}};
+  \end{tikzpicture}}
+\fancyfoot[LE]{%
+  \begin{tikzpicture}
+    \shade[left color=maincolor!20, right color=white, rounded corners=3pt] (0,0) rectangle (2.2, 0.65);
+    \node[text=maincolor, font=\bfseries\Large] at (0.7, 0.32) {\rule[-2pt]{1.2pt}{12pt} \hspace{2pt} \fpage};
+  \end{tikzpicture}}
+\fancyfoot[LO]{\small\color{maincolor!70}Giải tích 1 \,·\, Chương 1 \,·\, Giới hạn của dãy số}
+\fancyfoot[RE]{\small\color{maincolor!70}Giải tích 1 \,·\, Chương 1 \,·\, Giới hạn của dãy số}
+
+% ========================================================
+% BÌA SÁNG  (chỉ cần sửa khối "THÔNG TIN TẬP" cho các tập sau)
+% ========================================================
+\newcommand{\spaced}[1]{{\addfontfeature{LetterSpace=18}#1}}
+\newcommand{\szXS}{\fontsize{8}{8}\selectfont}
+
+% ---- THÔNG TIN TẬP
+\newcommand{\bookname}{GIẢI TÍCH 1}
+\newcommand{\volnum}{01}
+\newcommand{\chapnum}{1}
+\newcommand{\chapA}{GIỚI HẠN}
+\newcommand{\chapB}{CỦA DÃY SỐ}
+\newcommand{\tacgiaBia}{Nhật Thịnh}
+\newcommand{\bookSub}{Tài liệu tự học, tổng hợp từ giáo trình TS.Vũ Gia Tê và các nguồn khác}
+
+% ---- kiểu "chip" khái niệm
+\tikzset{chip/.style={rounded corners=2.2mm, inner xsep=2.7mm, inner ysep=1.5mm,
+  font={\cvfont\fontsize{10}{10}\selectfont}, anchor=west, line width=0.4pt}}
+\tikzset{lbl/.style={text=white, rounded corners=2.5mm,
+  minimum width=12mm, minimum height=5.6mm, inner sep=1mm,
+  font={\cvfont\bfseries\fontsize{12}{8}\selectfont}}}
+\newcommand{\chip}[4]{% #1 tên, #2 màu, #3 vị trí, #4 chữ
+  \node[chip, fill=#2!10, draw=#2!45, text=#2] (#1) at #3 {#4};}
+\newcommand{\chipnext}[4]{% #1 tên, #2 màu, #3 chip trước, #4 chữ
+  \node[chip, fill=#2!10, draw=#2!45, text=#2] (#1) at ($(#3.east)+(2.6,0)$) {#4};}
+
+\newcommand{\makecover}{%
+\thispagestyle{empty}%
+\begin{tikzpicture}[remember picture, overlay,
+  shift={(current page.south west)}, x=1mm, y=1mm]
+
+  % ---- nền trắng, vòng tròn mint, chấm cam
+  \fill[white] (0,0) rectangle (210,297);
+  \begin{scope}
+    \clip (0,0) rectangle (210,297);
+    \fill[covmint] (198,282) circle (80);
+  \end{scope}
+  \fill[badgecolor] (178,262) circle (10);
+
+  % ---- thanh trên
+  \foreach \i/\o in {0/1,1/0.75,2/0.5,3/0.3}{
+    \fill[maincolor, opacity=\o]
+      ({18+\i*6.5},273) -- ++(7,0) -- ++(-2.2,5) -- ++(-7,0) -- cycle;
+  }
+  \draw[maincolor, opacity=0.35, line width=0.3pt] (48,275.5) -- (130,275.5);
+  \node[anchor=west, text=maincolor, font=\cvfont\bfseries\footnotesize]
+    at (136,275.5) {\spaced{TẬP \volnum}};
+
+  % ---- tên sách
+  \node[anchor=west, text=maincolor, font=\cvfont\bfseries\small]
+    at (18,246) {\spaced{GIÁO TRÌNH TỰ HỌC}};
+  \node[anchor=west, text=maincolor, font=\cvfont\bfseries\fontsize{50}{50}\selectfont]
+    at (16.5,229) {\bookname};
+  \fill[badgecolor] (18,210) rectangle (46,211.4);
+
+  % ---- chương
+  \node[anchor=west, text=maincolor, font=\cvfont\bfseries\fontsize{140}{140}\selectfont]
+    at (15,178) {\chapnum};
+  \node[anchor=west, text=badgecolor, font=\cvfont\bfseries\large]
+    at (43,195) {\spaced{CHƯƠNG}};
+  \node[anchor=west, text=maincolor, font=\cvfont\bfseries\fontsize{30}{34}\selectfont]
+    at (42.5,182) {\chapA};
+  \node[anchor=west, text=maincolor, font=\cvfont\bfseries\fontsize{34}{38}\selectfont]
+    at (42.5,168) {\chapB};
+
+  % ---- thẻ minh hoạ hội tụ
+  \fill[white, draw=covline, line width=0.5pt, rounded corners=4mm] (18,82) rectangle (192,150);
+  \fill[maincolor, opacity=0.10] (28,108) rectangle (178,124);
+  \draw[badgecolor, dashed, line width=0.4pt] (28,124) -- (178,124);
+  \draw[badgecolor, dashed, line width=0.4pt] (28,108) -- (178,108);
+  \draw[maincolor, line width=0.9pt] (28,116) -- (178,116);
+  \node[lbl, fill=badgecolor] at (184.5,124) {$l{+}\varepsilon$};
+  \node[lbl, fill=maincolor]  at (184.5,116) {$l$};
+  \node[lbl, fill=badgecolor] at (184.5,108) {$l{-}\varepsilon$};
+
+  \foreach \n in {1,...,14}{
+    \ifodd\n \def\sgn{-1}\else\def\sgn{1}\fi
+    \pgfmathsetmacro{\d}{\sgn*26/(\n^0.9)}
+    \pgfmathsetmacro{\px}{32+(\n-1)*10.8}
+    \pgfmathsetmacro{\py}{116+\d}
+    \coordinate (p\n) at (\px,\py);
+    \pgfmathtruncatemacro{\out}{abs(\d)>8 ? 1 : 0}
+    \expandafter\xdef\csname isout\n\endcsname{\out}
+  }
+  \foreach \n in {1,...,13}{
+    \pgfmathtruncatemacro{\m}{\n+1}
+    \draw[maincolor, opacity=0.35, line width=0.35pt] (p\n) -- (p\m);
+  }
+  \foreach \n in {1,...,14}{
+    \ifnum\csname isout\n\endcsname=1
+      \fill[badgecolor] (p\n) circle (1.8);
+    \else
+      \fill[maincolor] (p\n) circle (1.5);
+    \fi
+  }
+  \node[text=maincolor, font=\cvfont\small] at (105,88.5)
+    {$|u_n-l|<\varepsilon\ \ \textnormal{với mọi}\ \ n\ge n_0$};
+
+  % ---- "Trong chương này bạn sẽ gặp" (8 chip)
+  \node[anchor=west, text=maincolor!70, font={\cvfont\bfseries\szXS}]
+    at (18,73) {\spaced{TRONG CHƯƠNG NÀY BẠN SẼ GẶP}};
+  \chip{c1}{maincolor}{(18,63)}{$\sup$, $\inf$ trên $\mathbb{R}$}
+  \chipnext{c2}{chippink}{c1}{số phức $\mathbb{C}$}
+  \chipnext{c3}{infocolor}{c2}{$\varepsilon$--$n_0$}
+  \chipnext{c4}{badgecolor}{c3}{số $e$}
+  \chip{c5}{chipgold}{(18,51.5)}{đơn điệu}
+  \chipnext{c6}{newcolor}{c5}{dãy Cauchy}
+  \chipnext{c7}{chipteal}{c6}{dãy con}
+  \chipnext{c8}{anscolor}{c7}{Bolzano--Weierstrass}
+
+  % ---- chân trang xanh + biên soạn
+  \fill[maincolor] (0,0) rectangle (210,40);
+  \fill[badgecolor] (164,40) rectangle (186,42);
+  \node[anchor=west, fill=white, rounded corners=2.2mm, text=maincolor,
+        inner xsep=5mm, inner ysep=3mm, font=\cvfont\bfseries\large]
+    at (18,26) {Biên soạn: \tacgiaBia};
+  \node[anchor=west, text=white, font=\cvfont\itshape\scriptsize]
+    at (18,11) {\bookSub};
+
+\end{tikzpicture}%
+\newpage}
+
+\begin{document}
+\renewcommand{\contentsname}{MỤC LỤC}
+
+% ========================================================
+% BÌA
+% ========================================================
+\makecover
+
+% ========================================================
+% MỤC LỤC
+% ========================================================
+{\intoctrue\tableofcontents}
+\clearpage
+
+% ========================================================
+% HƯỚNG DẪN ĐỌC
+% ========================================================
+\begin{hy}[CÁCH DÙNG CUỐN NÀY]
+Cuốn này gồm \textbf{3 bài} (Số thực, Số phức, Dãy số thực), một phần \textbf{Tổng hợp chương} (ôn lại toàn bộ trên một mạch) và phần \textbf{Đáp án} gom ở cuối sách. Mỗi bài có các phần A, B, C, \dots; cuối mỗi phần có khung \textbf{THỬ SỨC}: hãy làm trước rồi mới lật đáp án.
+\end{hy}
+
+\begin{tcolorbox}[colback=maincolor!5, colframe=maincolor!20, arc=5pt, boxrule=1pt, left=15pt, right=15pt, top=8pt, bottom=8pt]
+\begin{center}
+\small
+\renewcommand{\arraystretch}{1.5}
+\begin{tabular}{@{}l@{\;}l@{\qquad}l@{\;}l@{}}
+  \tagnho & chép vào vở, học thuộc & \taghieu & chỉ cần hiểu ý\\
+  \tagmoi & kiến thức mới so với THPT & \tagkho & chỗ khó, đọc chậm\\
+  \tagluu & dễ nhầm, dễ sai & \tagthu & bài tập áp dụng ngay\\
+\end{tabular}
+\end{center}
+\end{tcolorbox}
+
+% ########################################################
+% ########################################################
+%                        BÀI 1: SỐ THỰC
+% ########################################################
+% ########################################################
+\bai{BÀI 1. SỐ THỰC}{BÀI 1. SỐ THỰC $\boldsymbol{\mathbb{R}}$}{Tài liệu tự học, tự soạn, tổng hợp từ sách và các nguồn khác}
+
+\begin{hy}[BÀI NÀY NÓI VỀ CÁI GÌ? (đọc 30 giây)]
+Cả Chương 1 xây dựng một khái niệm: \textbf{giới hạn} (``dãy số tiến gần tới $l$''). Muốn nói được câu đó thì cần đúng hai thứ:
+\begin{enumerate}[label=\textbf{(\arabic*)}, leftmargin=*, itemsep=1pt, topsep=2pt]
+  \item Một tập số \textbf{không có lỗ hổng}, để dãy có chỗ ``đáp xuống''. Đó là $\RR$ và tính chất \emph{đầy} (Phần C).
+  \item Một cách \textbf{đo ``gần''}. Đó là giá trị tuyệt đối: ``$x$ gần $a$'' viết là $|x-a|<\eps$ (Phần E).
+\end{enumerate}
+Bài 1 chuẩn bị chính xác hai thứ này. Phần A, B, D là nền quen thuộc; \textbf{Phần C và E là chỗ cần chú ý nhất}.
+\end{hy}
+
+\begin{center}
+\renewcommand{\arraystretch}{1.5}
+\renewcommand{\tabularxcolumn}[1]{m{#1}}
+\begin{tabularx}{\textwidth}{@{}>{\centering\arraybackslash\bfseries\color{maincolor}}m{1.5cm} L >{\centering\arraybackslash}m{2.6cm}@{}}
+  \rowcolor{maincolor!15}\textbf{Phần} & \textbf{Nội dung} & \textbf{Mức độ}\\
+  A & Các tập số $\NN\subset\ZZ\subset\QQ\subset\RR$; số vô tỉ; chứng minh $\sqrt2$ là số vô tỉ & \tagde\\
+  B & Phép toán và thứ tự trong $\RR$ (``$\RR$ là một trường'') & \tagde\ \tagmoi\\
+  C & \textbf{Cận trên, cận dưới, $\sup$, $\inf$, tính đầy của $\RR$} & \tagmoi\ \tagkho\\
+  D & Số thực mở rộng $\pm\infty$ và các khoảng & \tagmoi\\
+  E & Giá trị tuyệt đối, khoảng cách, dạng $|x-a|<\eps$ & \tagmoi\ \tagkho\\
+\end{tabularx}
+\end{center}
+
+% ---------------- PHẦN A ----------------
+\phan{CÁC TẬP SỐ VÀ SỐ VÔ TỈ}
+
+\muc{A1}{Bốn tập số quen thuộc \tagde}
+
+\begin{center}
+\renewcommand{\arraystretch}{1.4}
+\begin{tabularx}{\textwidth}{@{}>{\centering\arraybackslash}p{1.6cm} L L@{}}
+  \rowcolor{maincolor!15}\textbf{Ký hiệu} & \textbf{Gồm những số nào} & \textbf{Ví dụ}\\
+  $\NN$ & số tự nhiên: $\{0,1,2,3,\dots\}$ & $0,\ 5,\ 100$\\
+  $\Ns$ \tagmoi & số tự nhiên \emph{khác} $0$: $\{1,2,3,\dots\}$ & $1,\ 2,\ 3$\\
+  $\ZZ$ & số nguyên (có thêm số âm) & $-3,\ 0,\ 7$\\
+  $\QQ$ & số hữu tỉ: viết được dạng $\dfrac mn$ với $m,n\in\ZZ$, $n\ne0$ & $\dfrac12,\ -0{,}75,\ 0{,}\overline{3}$\\
+  $\RR$ & số thực: mọi điểm trên trục số & $\sqrt2,\ \pi,\ e$ và mọi số ở trên\\
+\end{tabularx}
+\end{center}
+
+\begin{hy}[HIỂU Ý]
+$\Ns$ sẽ gặp \emph{liên tục} ở phần dãy số, vì số hạng đầu của dãy là $u_1$ (chỉ số bắt đầu từ $1$). Dấu $\ast$ nghĩa là ``bỏ số $0$''.
+\end{hy}
+\vspace{0.5cm}
+\textbf{Các tập số lồng vào nhau:} $\NN\subset\ZZ\subset\QQ\subset\RR$ (dấu $\subset$ đọc là ``nằm trong'').
+
+\begin{center}
+\begin{tikzpicture}[font=\small]
+  \draw[fill=maincolor!4,  draw=maincolor, thick] (0,0)     ellipse (7cm   and 2.6cm);
+  \draw[fill=maincolor!10, draw=maincolor, thick] (-1.2,0)  ellipse (5.2cm and 2.0cm);
+  \draw[fill=maincolor!18, draw=maincolor, thick] (-2.4,0)  ellipse (3.6cm and 1.4cm);
+  \draw[fill=maincolor!30, draw=maincolor, thick] (-3.3,0)  ellipse (2.0cm and 0.8cm);
+  \node[font=\bfseries\large, text=maincolor] at (-3.3,0.47) {$\NN$};
+  \node at (-3.3,-0.18) {$0,\ 1,\ 2,\ 3,\dots$};
+  \node[font=\bfseries\large, text=maincolor] at (-2.4,1.12) {$\ZZ$};
+  \node at (-3.3,-1.08) {$-1,\ -2,\ -3,\dots$};
+  \node[font=\bfseries\large, text=maincolor] at (-1.2,1.7) {$\QQ$};
+  \node[align=center] at (2.6,0) {$\dfrac12,\ -0{,}75$\\[2pt]$0{,}\overline{3}$};
+  \node[font=\bfseries\large, text=maincolor] at (0,2.3) {$\RR$};
+  \node[align=center, text=anscolor] at (5.5,0) {$\sqrt2,\ \pi,\ e$\\[2pt]{\footnotesize (số vô tỉ)}};
+\end{tikzpicture}
+\end{center}
+
+\muc{A2}{Vì sao phải mở rộng mãi? \taghieu}
+
+Mỗi lần mở rộng là vì tập cũ \textbf{còn thiếu} một thứ:
+
+\begin{center}
+\renewcommand{\arraystretch}{1.4}
+\begin{tabularx}{\textwidth}{@{}c L L c@{}}
+  \rowcolor{maincolor!15}\textbf{Tập cũ} & \textbf{Còn thiếu gì} & \textbf{Cách vá} & \textbf{Tập mới}\\
+  $\NN$ & không trừ thoải mái được: $3-5=\ ?$ & thêm số âm & $\ZZ$\\
+  $\ZZ$ & không chia thoải mái được: $1:2=\ ?$ & thêm phân số & $\QQ$\\
+  $\QQ$ & \textbf{vẫn thiếu}: đường chéo hình vuông cạnh $1$ dài $\sqrt2$ mà $\sqrt2$ không phải phân số & thêm số vô tỉ & $\RR$\\
+\end{tabularx}
+\end{center}
+
+\begin{center}
+\begin{tikzpicture}[x=3cm, y=3cm, font=\small]
+  \draw[->, thick, gray] (-0.3,0) -- (2.2,0);
+  \foreach \x in {0,1,2} \draw[gray] (\x,0.025) -- (\x,-0.025) node[below=2pt] {$\x$};
+  \draw[fill=maincolor!12, draw=maincolor, thick] (0,0) rectangle (1,1);
+  \node[above] at (0.5,1) {$1$};
+  \node[left] at (0,0.5) {$1$};
+  \draw[dashed, anscolor, thick] (0,0) -- (1,1) node[midway, above left] {\textcolor{anscolor}{$\sqrt2$}};
+  \draw[anscolor, thick] (45:1.41421) arc (45:0:1.41421);
+  \fill[anscolor] (1.41421,0) circle (1.8pt);
+  \node[anscolor, below=13pt] at (1.41421,0) {$\sqrt2\approx1{,}414\dots$};
+\end{tikzpicture}
+
+{\small\itshape Lấy đường chéo hình vuông cạnh $1$ ``xoay xuống'' trục số: ta được điểm $\sqrt2$, nằm giữa $1$ và $2$ mà không phải phân số.}
+\end{center}
+
+\begin{dn}{Số vô tỉ, số thực}
+\begin{itemize}[leftmargin=*, itemsep=2pt, topsep=2pt]
+  \item \textbf{Số vô tỉ} là số thập phân vô hạn \emph{không tuần hoàn} (như $\sqrt2,\ \pi,\ e$); không viết được dạng $\frac mn$.
+  \item \textbf{Số thực} gồm cả số hữu tỉ lẫn số vô tỉ: \quad $\RR=\QQ\cup(\RR\setminus\QQ)$.
+  \item \tagmoi\ Ký hiệu $\RR\setminus\QQ$ đọc là ``$\RR$ bỏ đi $\QQ$'': đó chính là \textbf{tập các số vô tỉ}.
+  \item Mỗi số thực ứng với \textbf{đúng một điểm} trên trục số và ngược lại. Các số thực \emph{lấp đầy} trục số.
+\end{itemize}
+\end{dn}
+\vspace{0.5cm}
+\muc{A3}{Chứng minh $\sqrt2$ là số vô tỉ (phương pháp phản chứng)}
+
+\begin{hy}[HIỂU Ý: ``phản chứng'' là gì?]
+Muốn chứng minh một điều đúng, ta \textbf{giả sử nó sai}, rồi suy ra một điều \textbf{vô lý}. Vô lý nghĩa là giả sử ban đầu không thể đúng, vậy điều cần chứng minh đúng. Cách làm này dùng rất nhiều về sau.
+\end{hy}
+\vspace{0.3cm}
+\begin{vd}{$\sqrt2\notin\QQ$}
+\begin{enumerate}[label=\textbf{Bước \arabic*.}, leftmargin=*, itemsep=2pt, topsep=2pt]
+  \item \textbf{Giả sử} $\sqrt2=\dfrac mn$, trong đó $\dfrac mn$ là phân số \textbf{tối giản} ($m,n$ không có ước chung nào ngoài $1$).
+  \item Bình phương hai vế: $m^2=2n^2$. Vậy $m^2$ là số \textbf{chẵn}.
+  \item $m^2$ chẵn thì $m$ chẵn (vì nếu $m$ lẻ thì $m^2$ lẻ). Viết $m=2p$.
+  \item Thay vào: $4p^2=2n^2$, suy ra $n^2=2p^2$. Vậy $n^2$ chẵn, nên $n$ cũng \textbf{chẵn}.
+  \item Vậy $m$ và $n$ \emph{cùng chia hết cho $2$}, trái với ``tối giản''. \textbf{Vô lý!}
+  \item Kết luận: $\sqrt2$ không viết được dạng $\frac mn$, tức là $\sqrt2\in\RR\setminus\QQ$. 
+\end{enumerate}
+\end{vd}
+
+\begin{ts}
+\begin{enumerate}[label=\bt{A\arabic*.}, leftmargin=*, itemsep=4pt]
+  \item Mỗi số sau thuộc tập \emph{nhỏ nhất} nào trong $\NN,\ \ZZ,\ \QQ,\ \RR\setminus\QQ$?\\
+  $-3;\quad 0{,}75;\quad \sqrt9;\quad \sqrt3;\quad 0{,}333\ldots\text{ (tuần hoàn)};\quad \pi$.
+  \item Bắt chước Ví dụ trên, chứng minh $\sqrt3$ là số vô tỉ. \textit{(Gợi ý: $m^2=3n^2$ thì $m$ chia hết cho $3$.)}
+  \item Số $0{,}101001000100001\ldots$ (sau mỗi chữ số $1$ thêm một chữ số $0$ so với lần trước) là số hữu tỉ hay vô tỉ? Vì sao?
+\end{enumerate}
+\end{ts}
+
+% ---------------- PHẦN B ----------------
+\phan{PHÉP TOÁN VÀ THỨ TỰ TRONG $\RR$}
+
+\muc{B1}{Tính chất 1: $\RR$ là một ``trường'' \tagde\ \tagmoi}
+
+Nghe tên lạ nhưng \textbf{nội dung bạn đã dùng từ tiểu học}. ``Trường'' chỉ có nghĩa: cộng, trừ, nhân, chia (trừ chia cho $0$) đều thoải mái, kết quả vẫn là số thực. Đây là bảng các ``luật chơi'':
+
+\begin{center}
+\renewcommand{\arraystretch}{1.4}
+\begin{tabularx}{\textwidth}{@{}>{\bfseries\color{maincolor}}l L L@{}}
+  \rowcolor{maincolor!15}\textbf{Luật} & \textbf{Viết} & \textbf{Ví dụ}\\
+  Đóng kín & $a+b\in\RR,\quad ab\in\RR$ & cộng, nhân hai số thực vẫn ra số thực\\
+  Kết hợp & $(a+b)+c=a+(b+c)$, \ $(ab)c=a(bc)$ & $(2+3)+4=2+(3+4)$\\
+  Giao hoán & $a+b=b+a$, \ $ab=ba$ & $3\cdot5=5\cdot3$\\
+  Phần tử \textbf{trung hòa} \tagmoi & $a+0=a$, \ $a\cdot1=a$ & $0$ và $1$ ``không làm đổi số''\\
+  Phân phối & $a(b+c)=ab+ac$ & $2(3+4)=2\cdot3+2\cdot4$\\
+  Số \textbf{đối} & $a+(-a)=0$ & $5+(-5)=0$\\
+  Số \textbf{nghịch đảo} ($a\ne0$) & $a\cdot a^{-1}=1$ & $5\cdot\dfrac15=1$\\
+\end{tabularx}
+\end{center}
+
+\begin{hy}[HIỂU Ý: vì sao phải liệt kê những điều hiển nhiên?]
+Vì \emph{mọi} quy tắc biến đổi bạn dùng sau này (chuyển vế, quy đồng, đặt nhân tử chung, \dots) đều suy ra từ đúng những luật này. Giải tích chặt chẽ bắt đầu từ việc ``liệt kê luật chơi'' như vậy.
+\end{hy}
+
+\begin{ly}
+\textbf{Tập số vô tỉ $\RR\setminus\QQ$ không ``đóng kín'' với phép cộng và nhân:}
+\[\sqrt2+(-\sqrt2)=0\in\QQ,\qquad \sqrt2\cdot\sqrt2=2\in\QQ.\]
+Nhưng nếu $x\in\QQ$ và $y\in\RR\setminus\QQ$ thì $x+y$, $x\cdot y$ (với $x\ne0$) và $\dfrac1y$ đều là \textbf{số vô tỉ}.
+\textit{Vì sao $x+y$ vô tỉ?} Giả sử $x+y=q$ hữu tỉ thì $y=q-x$ hữu tỉ, vô lý.
+\end{ly}
+
+\muc{B2}{Tính chất 2: $\RR$ có thứ tự \tagde}
+
+\begin{tc}{Thứ tự trên $\RR$}
+\begin{enumerate}[label=\textbf{\arabic*.}, leftmargin=*, itemsep=2pt, topsep=2pt]
+  \item Hai số thực bất kỳ đều \textbf{so sánh được}: $a<b$, hoặc $a=b$, hoặc $a>b$.
+  \item $a<b\ \Rightarrow\ a+c<b+c$ \quad (cộng cùng một số, chiều không đổi).
+  \item $a<b$ và $c>0\ \Rightarrow\ ac<bc$ \quad (nhân số \textbf{dương}, chiều không đổi).
+  \item Tổng và tích của hai số dương là số dương.
+\end{enumerate}
+\end{tc}
+
+\begin{ly}
+Nhân hai vế với số \textbf{âm} thì bất đẳng thức \textbf{đổi chiều}: $2<3$ nhưng $-2>-3$. Nhớ hình: nhân với $-1$ là ``lật qua số $0$'', thứ tự bị đảo.
+\end{ly}
+
+\begin{center}
+\begin{tikzpicture}[x=0.9cm, font=\small]
+  \draw[->, thick, gray] (-4.6,0) -- (4.6,0);
+  \foreach \x in {-4,...,4} \draw[gray] (\x,0.08) -- (\x,-0.08) node[below=1pt, font=\scriptsize] {$\x$};
+  \fill[maincolor] (2,0) circle (2.6pt);  \fill[maincolor] (3,0) circle (2.6pt);
+  \fill[anscolor]  (-2,0) circle (2.6pt); \fill[anscolor]  (-3,0) circle (2.6pt);
+  \draw[<->, dashed, gray] (2,0.2) to[bend left=65] (-2,0.2);
+  \draw[<->, dashed, gray] (3,0.2) to[bend left=70] (-3,0.2);
+  \node[gray] at (0,1.55) {nhân với $-1$: lật qua $0$};
+  \node[maincolor, above=2pt] at (2.5,0.15) {$2<3$};
+  \node[anscolor,  above=2pt] at (-2.5,0.15) {$-3<-2$};
+\end{tikzpicture}\\[2pt]
+{\small\itshape Sau khi lật, $3$ chạy sang trái của $2$: thứ tự bị đảo.}
+\end{center}
+
+\begin{ts}
+\begin{enumerate}[label=\bt{B\arabic*.}, leftmargin=*, itemsep=4pt]
+  \item Đúng hay sai? (nếu sai, cho ví dụ)\\
+  a) Tổng hai số vô tỉ luôn là số vô tỉ. \quad b) Tích hai số vô tỉ luôn là số vô tỉ. \quad c) Tổng một số hữu tỉ và một số vô tỉ luôn là số vô tỉ.
+  \item Cho $a<b$ và $c<0$. So sánh $ac$ và $bc$.
+  \item Biết $x<y$. So sánh: a) $x+5$ và $y+5$; \quad b) $-3x$ và $-3y$.
+\end{enumerate}
+\end{ts}
+
+% ---------------- PHẦN C ----------------
+\phan{TÍNH ĐẦY CỦA $\RR$ \ \tagkho}
+\vspace{0.5cm}
+\begin{hy}[ĐỌC TRƯỚC KHI VÀO PHẦN KHÓ NHẤT]
+Phần này \textbf{mới hoàn toàn} so với THPT và là phần ``đắt'' nhất của bài: mọi chứng minh giới hạn ở các bài sau đều dựa vào nó. Không hiểu ngay là bình thường. Cách học: đọc từng mục một, xem hình, làm bài tập nhỏ, và hiểu sẽ đến dần. Tóm tắt một câu: \textbf{$\RR$ là tập số ``không có lỗ hổng''; $\QQ$ thì có lỗ hổng (chính là chỗ $\sqrt2$)}.
+\end{hy}
+\muc{C1}{Cận trên và cận dưới \tagmoi}
+
+\begin{dn}{Cận trên, cận dưới, tập bị chặn}
+Cho một tập $X\subset\RR$.
+\begin{itemize}[leftmargin=*, itemsep=2pt, topsep=2pt]
+  \item $a$ là \textbf{cận trên} của $X$ nếu mọi $x\in X$ đều có $x\le a$ (số $a$ là ``cái trần'' đè lên $X$).
+  \item $b$ là \textbf{cận dưới} của $X$ nếu mọi $x\in X$ đều có $x\ge b$ (``cái sàn'' nằm dưới $X$).
+  \item $X$ \textbf{bị chặn trên} nếu có ít nhất một cận trên; \textbf{bị chặn dưới} tương tự; \textbf{bị chặn} nếu bị cả hai.
+\end{itemize}
+\end{dn}
+
+Ví dụ: $X=\{1,2,3\}$ có các cận trên là $3,\ 4,\ 5,\ 100,\dots$ (số nào $\ge3$ cũng được). Cận dưới là $1,\ 0,\ -7,\dots$
+
+\muc{C2}{Cận trên đúng ($\sup$) và cận dưới đúng ($\inf$) \tagmoi\ \tagkho}
+
+Trong vô số cận trên, ta chỉ quan tâm cái \textbf{nhỏ nhất}; trong vô số cận dưới, cái \textbf{lớn nhất}:
+
+\begin{dn}{$\sup$ và $\inf$}
+\begin{itemize}[leftmargin=*, itemsep=2pt, topsep=2pt]
+  \item $\sup X$ (đọc ``suprémum''): \textbf{cận trên nhỏ nhất} của $X$, tức ``cái trần \emph{thấp nhất}''.
+  \item $\inf X$ (đọc ``infimum''): \textbf{cận dưới lớn nhất} của $X$, tức ``cái sàn \emph{cao nhất}''.
+\end{itemize}
+\end{dn}
+
+\begin{center}
+\begin{tikzpicture}[x=3cm, font=\small]
+  \draw[->, thick, gray] (-1.75,0) -- (2.75,0);
+  \draw[maincolor, line width=3.2pt] (0,0) -- (1,0);
+  \draw[fill=white, draw=maincolor, thick] (0,0) circle (3.2pt);
+  \draw[fill=white, draw=maincolor, thick] (1,0) circle (3.2pt);
+  \node[maincolor, above=6pt] at (0.5,0) {$X=(0;\,1)$};
+  \foreach \x in {1,1.5,2,2.5} \draw[anscolor, thick] (\x,0.13) -- (\x,-0.13);
+  \node[anscolor, below=7pt, align=center] at (1.75,0) {các \textbf{cận trên} của $X$\\{\footnotesize (số nào $\ge1$ cũng được)}};
+  \draw[->, anscolor, thick] (1.5,0.7) -- (1.03,0.17);
+  \node[anscolor, above] at (1.6,0.68) {$\sup X=1$ \ {\footnotesize (nhỏ nhất)}};
+  \foreach \x in {0,-0.5,-1,-1.5} \draw[infocolor, thick] (\x,0.13) -- (\x,-0.13);
+  \node[infocolor, below=7pt, align=center] at (-0.75,0) {các \textbf{cận dưới} của $X$\\{\footnotesize (số nào $\le0$ cũng được)}};
+  \draw[->, infocolor, thick] (-0.5,0.7) -- (-0.03,0.17);
+  \node[infocolor, above] at (-0.6,0.68) {$\inf X=0$ \ {\footnotesize (lớn nhất)}};
+\end{tikzpicture}
+\end{center}
+
+\muc{C3}{Max, Min khác gì $\sup$, $\inf$? \tagkho}
+
+\begin{dn}{$\max$ và $\min$}
+Nếu $\sup X$ \textbf{thuộc} $X$ thì gọi nó là $\max X$ (số lớn nhất của $X$). Nếu $\inf X$ thuộc $X$ thì gọi nó là $\min X$.
+Nếu $\sup X\notin X$ thì $X$ \textbf{không có} $\max$.
+\end{dn}
+
+\begin{center}
+\renewcommand{\arraystretch}{1.4}
+\begin{tabularx}{\textwidth}{@{}l c c c c@{}}
+  \rowcolor{maincolor!15}\textbf{Tập $X$} & $\sup$ & $\inf$ & $\max$ & $\min$\\
+  $[0;1]$ & $1$ & $0$ & $1$ & $0$\\
+  $(0;1)$ & $1$ & $0$ & \textcolor{anscolor}{không có} & \textcolor{anscolor}{không có}\\
+  $\{1,2,3\}$ & $3$ & $1$ & $3$ & $1$\\
+  $\{1,\tfrac12,\tfrac13,\tfrac14,\dots\}=\{\tfrac1n\}$ & $1$ & $0$ & $1$ & \textcolor{anscolor}{không có} \ ($0\notin X$)\\
+\end{tabularx}
+\end{center}
+
+\begin{hy}[HIỂU Ý: vì sao phải bày ra $\sup$, $\inf$ khi đã có $\max$, $\min$?]
+Vì $\max$, $\min$ \textbf{có thể không tồn tại} (như tập $(0;1)$), còn $\sup$, $\inf$ thì \textbf{luôn tồn tại} (với tập bị chặn, xem C5). Nên $\sup$, $\inf$ là công cụ đáng tin hơn.
+\end{hy}
+
+\muc{C4}{Cách hiểu $\sup$ bằng $\varepsilon$ \tagkho}
+\vspace{0.5cm}
+\begin{tc}{Đặc trưng của $\sup$}
+$M^\ast=\sup X$ nghĩa là: (1) $M^\ast$ là một cận trên của $X$, và (2) với mọi $\eps>0$ nhỏ tùy ý, \textbf{luôn tìm được} $x\in X$ sao cho
+\[M^\ast-\eps<x\le M^\ast.\]
+\end{tc}
+\vspace{0.3cm}
+\textbf{Hiểu ý:} nếu ta \textbf{hạ cái trần xuống} một chút (từ $M^\ast$ xuống $M^\ast-\eps$) thì phần tử nào đó của $X$ sẽ ``chọc thủng'' trần mới. Vậy $M^\ast$ đã là trần thấp nhất, không hạ thêm được.
+
+\begin{center}
+\begin{tikzpicture}[font=\small]
+  \draw[->, thick, gray] (0,0) -- (11,0);
+  \fill[maincolor!15] (6,-0.28) rectangle (9,0.28);
+  \draw[anscolor, thick] (9,0.45) -- (9,-0.45) node[below=3pt] {$M^\ast=\sup X$};
+  \draw[badgecolor, thick] (6,0.45) -- (6,-0.45) node[below=3pt] {$M^\ast-\eps$};
+  \foreach \x in {1,2.2,3.4,4.5,5.3} \fill[maincolor] (\x,0) circle (2.6pt);
+  \fill[anscolor] (7.3,0) circle (3pt) node[above=5pt] {$x\in X$};
+  \draw[decorate, decoration={brace, amplitude=5pt, mirror}] (6,-1.25) -- (9,-1.25) node[midway, below=6pt] {$\eps$};
+\end{tikzpicture}\\[2pt]
+{\small\itshape Luôn có ít nhất một $x\in X$ rơi vào đoạn $(M^\ast-\eps;\ M^\ast]$, dù $\eps$ nhỏ đến đâu.}
+\end{center}
+
+\textbf{Kiểm tra bằng số:} $X=(0;1)$, $M^\ast=1$, $\eps=0{,}01$. Lấy $x=0{,}995\in X$ thì $0{,}995>1-0{,}01=0{,}99$. \checkmark
+\vspace{0.3cm}
+\muc{C5}{Tính chất 3: $\RR$ là tập ``đầy'' \tagmoi\ \tagkho}
+\vspace{0.3cm}
+\begin{tc}{Tính đầy của $\RR$ \ \tagnho}
+\begin{itemize}[leftmargin=*, itemsep=2pt, topsep=2pt]
+  \item Mọi tập con \textbf{khác rỗng} của $\RR$ \textbf{bị chặn trên} đều có $\sup$ (và $\sup$ này \textbf{thuộc $\RR$}).
+  \item Mọi tập con khác rỗng của $\RR$ \textbf{bị chặn dưới} đều có $\inf$ thuộc $\RR$.
+\end{itemize}
+\end{tc}
+\vspace{0.2cm}
+\begin{hy}[HIỂU Ý: tại sao $\QQ$ ``có lỗ hổng'' còn $\RR$ thì không?]
+Xét tập $X=\{x\in\QQ:\ x^2<2\}$ (các số hữu tỉ ``nhỏ hơn $\sqrt2$''). Nó bị chặn trên. Cái trần thấp nhất của nó phải là $\sqrt2$, nhưng $\sqrt2\notin\QQ$. Nghĩa là \textbf{trong $\QQ$, tập $X$ không có $\sup$}: đó là lỗ hổng của $\QQ$ tại $\sqrt2$.\\
+Trong $\RR$ thì $\sqrt2$ có mặt, lỗ hổng được lấp. \textbf{Tính đầy chính là ``trục số không có lỗ hổng''.}
+\end{hy}
+
+\muc{C6}{Ví dụ mẫu}
+\vspace{0.3cm}
+\begin{vd}{Tìm $\sup,\inf,\max,\min$ của $X=\left\{\dfrac{(-1)^n}{n}:\ n\in\Ns\right\}$}
+Viết vài số hạng: $n=1$: $-1$; \ $n=2$: $\tfrac12$; \ $n=3$: $-\tfrac13$; \ $n=4$: $\tfrac14$; \ $n=5$: $-\tfrac15$; \dots
+
+\begin{center}
+\begin{tikzpicture}[x=8cm, font=\small]
+  \draw[->, thick, gray] (-1.12,0) -- (0.62,0);
+  \draw[gray] (0,0.04) -- (0,-0.04) node[below=3pt] {$0$};
+  \foreach \n in {1,...,16}{
+    \pgfmathsetmacro{\v}{ifthenelse(mod(\n,2)==1,-1/\n,1/\n)}
+    \fill[maincolor] (\v,0) circle (2.4pt);
+  }
+  \node[below=7pt, font=\scriptsize] at (-1,0) {$u_1=-1$};
+  \node[below=7pt, font=\scriptsize] at (-0.3333,0) {$u_3=-\frac13$};
+  \node[above=7pt, font=\scriptsize] at (0.25,0) {$u_4=\frac14$};
+  \node[anscolor, above=7pt] at (0.5,0) {$\sup=\max=\frac12$};
+  \node[infocolor, above=7pt] at (-1,0) {$\inf=\min=-1$};
+\end{tikzpicture}\\[2pt]
+{\small\itshape Các số hạng dồn dần về $0$, nằm giữa $-1$ và $\tfrac12$.}
+\end{center}
+
+\begin{itemize}[leftmargin=*, itemsep=2pt, topsep=2pt]
+  \item Số hạng âm ($n$ lẻ) nhỏ nhất là $-1$; số hạng dương ($n$ chẵn) lớn nhất là $\tfrac12$. Mọi số hạng nằm giữa $-1$ và $\tfrac12$.
+  \item $\sup X=\tfrac12\in X$ nên $\max X=\tfrac12$. \quad $\inf X=-1\in X$ nên $\min X=-1$.
+\end{itemize}
+\end{vd}
+\newpage
+\begin{ts}
+\begin{enumerate}[label=\bt{C\arabic*.}, leftmargin=*, itemsep=4pt]
+  \item Tìm $\sup,\inf,\max,\min$ (nếu có) của:\\
+  a) $X=[2;5)$ \qquad b) $X=\left\{\dfrac{n}{n+1}:\ n\in\Ns\right\}$ (các số $\tfrac12,\tfrac23,\tfrac34,\dots$) \qquad c) $X=\{x\in\RR:\ x^2<4\}$.
+  \item Đúng hay sai? a) Nếu $X$ có $\max$ thì $\max X=\sup X$. \quad b) Mọi tập bị chặn trên đều có $\max$.
+  \item Tìm $\sup,\inf$ của $X=\left\{1+\dfrac1n:\ n\in\Ns\right\}$ và cho biết có $\max$, $\min$ hay không.
+  \item Với $X=(0;1)$, $M^\ast=1$, $\eps=0{,}001$: chỉ ra một số $x\in X$ thỏa $x>M^\ast-\eps$.
+\end{enumerate}
+\end{ts}
+
+% ---------------- PHẦN D ----------------
+\phan{SỐ THỰC MỞ RỘNG VÀ CÁC KHOẢNG}
+
+\muc{D1}{Thêm $+\infty$ và $-\infty$ \tagmoi}
+\vspace{0.3cm}
+\begin{dn}{$\RRb$ (số thực mở rộng)}
+$\RRb=\RR\cup\{-\infty,\ +\infty\}$. Quy ước thứ tự: $-\infty<x<+\infty$ với mọi số thực $x$.\\
+\textbf{$\infty$ không phải một số thực}, chỉ là ký hiệu cho ``lớn hơn (hay nhỏ hơn) mọi số''.
+\end{dn}
+\vspace{0.3cm}
+\begin{center}
+\renewcommand{\arraystretch}{1.4}
+\begin{tabularx}{\textwidth}{@{}L L@{}}
+  \rowcolor{maincolor!15}\textbf{Được phép tính (với $x\in\RR$)} & \textbf{KHÔNG xác định (dạng vô định)}\\
+  $x+(+\infty)=+\infty,\quad x+(-\infty)=-\infty$ & $(+\infty)-(+\infty)$\\
+  $(+\infty)+(+\infty)=+\infty,\quad (-\infty)+(-\infty)=-\infty$ & $0\cdot(\pm\infty)$\\
+  $x\cdot(+\infty)=+\infty$ nếu $x>0$;\quad $=-\infty$ nếu $x<0$ & $\dfrac{\infty}{\infty}$\\
+\end{tabularx}
+\end{center}
+\vspace{0.3cm}
+\begin{ly}
+Gặp các dạng ở cột phải thì \textbf{không được kết luận ngay}: phải có cách xử lý riêng. Bạn sẽ gặp lại chúng khi tính giới hạn.
+\end{ly}
+\vspace{0.3cm}
+\muc{D2}{Các khoảng \tagde}
+
+\begin{center}
+\begin{tikzpicture}[font=\small,
+  cl/.style={circle, fill=maincolor, draw=maincolor, inner sep=2.2pt},
+  op/.style={circle, fill=white, draw=maincolor, thick, inner sep=2.2pt}]
+  \foreach \y in {0,-1,-2,-3,-4} \draw[gray!60] (0,\y) -- (5,\y);
+  \node[gray, above] at (1.5,0.1) {$a$}; \node[gray, above] at (3.5,0.1) {$b$};
+  \draw[maincolor, line width=2.6pt] (1.5,0) -- (3.5,0); \node[cl] at (1.5,0) {}; \node[cl] at (3.5,0) {};
+  \node[anchor=east] at (-0.2,0) {$[a;\,b]$};  \node[anchor=west] at (5.4,0) {$a\le x\le b$};  \node[anchor=west, gray] at (8.4,0) {đoạn (đóng)};
+  \draw[maincolor, line width=2.6pt] (1.5,-1) -- (3.5,-1); \node[op] at (1.5,-1) {}; \node[op] at (3.5,-1) {};
+  \node[anchor=east] at (-0.2,-1) {$(a;\,b)$};  \node[anchor=west] at (5.4,-1) {$a<x<b$};  \node[anchor=west, gray] at (8.4,-1) {khoảng (mở)};
+  \draw[maincolor, line width=2.6pt] (1.5,-2) -- (3.5,-2); \node[cl] at (1.5,-2) {}; \node[op] at (3.5,-2) {};
+  \node[anchor=east] at (-0.2,-2) {$[a;\,b)$};  \node[anchor=west] at (5.4,-2) {$a\le x<b$};  \node[anchor=west, gray] at (8.4,-2) {nửa khoảng};
+  \draw[maincolor, line width=2.6pt, -{Latex[length=2.2mm]}] (1.5,-3) -- (5,-3); \node[op] at (1.5,-3) {};
+  \node[anchor=east] at (-0.2,-3) {$(a;\,+\infty)$};  \node[anchor=west] at (5.4,-3) {$x>a$};  \node[anchor=west, gray] at (8.4,-3) {khoảng (mở)};
+  \draw[maincolor, line width=2.6pt, -{Latex[length=2.2mm]}] (1.5,-4) -- (0,-4); \node[cl] at (1.5,-4) {};
+  \node[anchor=east] at (-0.2,-4) {$(-\infty;\,a]$};  \node[anchor=west] at (5.4,-4) {$x\le a$};  \node[anchor=west, gray] at (8.4,-4) {nửa khoảng};
+\end{tikzpicture}
+\end{center}
+
+\begin{tc}{Quy tắc nhớ \ \tagnho}
+\begin{itemize}[leftmargin=*, itemsep=2pt, topsep=2pt]
+  \item Ngoặc \textbf{vuông} $[\ \,]$ = \textbf{lấy} đầu mút (chấm \emph{đặc}). Ngoặc \textbf{tròn} $(\ \,)$ = \textbf{không lấy} (chấm \emph{rỗng}).
+  \item Với $\pm\infty$ thì \textbf{luôn dùng ngoặc tròn}, vì $\infty$ không phải số.
+\end{itemize}
+\end{tc}
+\vspace{0.4cm}
+\tagluu\ Ở Việt Nam dấu phẩy là dấu thập phân ($0{,}5$), nên viết khoảng bằng dấu chấm phẩy $(a;\,b)$ cho khỏi nhầm. Giáo trình gốc viết $(a,b)$; hai cách là một.
+\vspace{0.5cm}
+\begin{ts}
+\begin{enumerate}[label=\bt{D\arabic*.}, leftmargin=*, itemsep=4pt]
+  \item Viết bằng ký hiệu khoảng: a) $-1\le x<4$ \quad b) $x>2$ \quad c) $x\le0$.
+  \item Liệt kê các số nguyên thuộc $(-2;\,3]$.
+  \item Tính: $(+\infty)+5$; \quad $(-3)\cdot(+\infty)$; \quad $(-\infty)+(-\infty)$.
+  \item Trong các phép sau, phép nào \textbf{không xác định}? a) $(+\infty)+(+\infty)$ \quad b) $(+\infty)-(+\infty)$ \quad c) $(-2)\cdot(+\infty)$ \quad d) $0\cdot(+\infty)$.
+\end{enumerate}
+\end{ts}
+
+
+% ---------------- PHẦN E ----------------
+\phan{GIÁ TRỊ TUYỆT ĐỐI VÀ KHOẢNG CÁCH}
+
+\muc{E1}{Giá trị tuyệt đối \tagde}
+\vspace{0.4cm}
+\begin{dn}{Giá trị tuyệt đối}
+\[
+|x|=\begin{cases} x & \text{nếu } x\ge0,\\ -x & \text{nếu } x<0.\end{cases}
+\]
+\textbf{Hiểu bằng hình:} $|x|$ là \textbf{khoảng cách từ $x$ đến $0$} trên trục số, nên luôn $\ge0$.
+\end{dn}
+\vspace{0.3cm}
+\begin{center}
+\begin{tikzpicture}[x=1cm, font=\small]
+  \draw[->, thick, gray] (-4.6,0) -- (4.6,0);
+  \foreach \x in {-4,...,4} \draw[gray] (\x,0.08) -- (\x,-0.08) node[below=1pt, font=\scriptsize] {$\x$};
+  \draw[<->, maincolor, thick] (-3,0.55) -- (0,0.55) node[midway, above] {$3$};
+  \draw[<->, maincolor, thick] (0,0.55) -- (3,0.55) node[midway, above] {$3$};
+  \fill[anscolor] (-3,0) circle (2.6pt); \fill[anscolor] (3,0) circle (2.6pt);
+  \node[anscolor] at (-3,-0.95) {$|-3|=3$}; \node[anscolor] at (3,-0.95) {$|3|=3$};
+\end{tikzpicture}
+\end{center}
+\newpage 
+
+\muc{E2}{Tính chất của giá trị tuyệt đối}
+\vspace{0.4cm}
+\begin{tc}{Năm tính chất cần nhớ \ \tagnho}
+\begin{enumerate}[label=\textbf{\arabic*.}, leftmargin=*, itemsep=2pt, topsep=2pt]
+  \item $|x|\ge0$, và $|x|=0\iff x=0$.
+  \item $|xy|=|x|\,|y|$; \quad $\left|\dfrac1x\right|=\dfrac1{|x|}$ \ ($x\ne0$).
+  \item \textbf{Bất đẳng thức tam giác:} $\ |x+y|\le|x|+|y|$. \ \tagmoi\tagkho
+  \item $\big||x|-|y|\big|\le|x-y|$. \ \tagmoi
+  \item $\max(x,y)=\tfrac12\big(x+y+|x-y|\big)$, \quad $\min(x,y)=\tfrac12\big(x+y-|x-y|\big)$. \ \tagmoi
+\end{enumerate}
+\end{tc}
+\vspace{0.5cm}
+\textbf{Kiểm tra tính chất 3 bằng số} (hiểu thật rồi mới nhớ):
+\begin{center}
+\renewcommand{\arraystretch}{1.35}
+\begin{tabular}{@{}c c c c@{}}
+  \rowcolor{maincolor!15}$(x,\ y)$ & $|x+y|$ & $|x|+|y|$ & So sánh\\
+  $(3,\ -5)$ & $|-2|=2$ & $3+5=8$ & $2<8$\\
+  $(3,\ 5)$ & $8$ & $8$ & $8=8$\\
+  $(-4,\ -6)$ & $10$ & $10$ & $10=10$\\
+\end{tabular}
+\end{center}
+\vspace{0.3cm}
+\textbf{Nhận xét:} dấu ``$=$'' xảy ra khi $x,y$ \textbf{cùng dấu}; khi trái dấu thì hai số ``triệt tiêu bớt'' nên vế trái nhỏ hơn.
+
+\textbf{Kiểm tra tính chất 5:} $x=3,\ y=7$: $\tfrac12(10+4)=7=\max$, \quad $\tfrac12(10-4)=3=\min$. \checkmark
+
+\muc{E3}{Dạng $|x-a|<\eps$: công cụ dùng nhiều nhất về sau \tagmoi\ \tagkho}
+
+\begin{tc}{Với $\eps>0$ \ \tagnho}
+\[
+|x|<\eps\iff -\eps<x<\eps,\qquad
+|x-a|<\eps\iff a-\eps<x<a+\eps.
+\]
+Ngược lại: \quad $|x|\ge\eps\iff x\ge\eps\ \text{hoặc}\ x\le-\eps$.
+\end{tc}
+
+\textbf{Hiểu ý:} ``$x$ cách $a$ \emph{chưa tới} $\eps$'' nghĩa là $x$ nằm trong khoảng $(a-\eps;\,a+\eps)$, một ``dải'' ôm quanh $a$.
+
+\begin{center}
+\begin{tikzpicture}[font=\small]
+  \draw[->, thick, gray] (0,0) -- (10.5,0);
+  \fill[maincolor!15] (3,-0.28) rectangle (7,0.28);
+  \draw[maincolor, thick] (3,0.4) -- (3,-0.4) node[below=3pt] {$a-\eps$};
+  \draw[maincolor, thick] (7,0.4) -- (7,-0.4) node[below=3pt] {$a+\eps$};
+  \fill[anscolor] (5,0) circle (2.8pt) node[below=7pt] {$a$};
+  \fill[maincolor] (5.9,0) circle (2.8pt) node[above=5pt] {$x$};
+  \draw[<->, badgecolor, thick] (3,0.95) -- (5,0.95) node[midway, above] {$\eps$};
+  \draw[<->, badgecolor, thick] (5,0.95) -- (7,0.95) node[midway, above] {$\eps$};
+\end{tikzpicture}\\[2pt]
+{\small\itshape Dải xanh = tập mọi $x$ thỏa $|x-a|<\eps$.}
+\end{center}
+
+\begin{hy}[BẠN SẼ DÙNG NÓ Ở ĐÂU?]
+Định nghĩa giới hạn của dãy số (Bài 3) viết là $|u_n-l|<\eps$. Nghĩa là: \textbf{từ một vị trí nào đó trở đi, mọi số hạng $u_n$ đều nằm trong dải $(l-\eps;\,l+\eps)$.} Nắm vững hình này là nắm được nửa khái niệm giới hạn.
+\end{hy}
+
+\muc{E4}{Khoảng cách trong $\RR$ \tagmoi}
+\vspace{0.3cm}
+\begin{dn}{Khoảng cách}
+$d(x,y)=|x-y|$: độ dài đoạn nối hai điểm $x,y$ trên trục số.
+\end{dn}
+\vspace{0.3cm}
+\begin{tc}{Bốn tính chất của khoảng cách}
+\begin{enumerate}[label=\textbf{\arabic*.}, leftmargin=*, itemsep=2pt, topsep=2pt]
+  \item $d(x,y)\ge0$, và $d(x,y)=0\iff x=y$.
+  \item $d(x,y)=d(y,x)$ \ (đối xứng).
+  \item $d(x,z)\le d(x,y)+d(y,z)$ \ (đi vòng qua $y$ không ngắn hơn đi thẳng).
+  \item $d(x,y)\ge\big|d(x,z)-d(y,z)\big|$.
+\end{enumerate}
+\end{tc}
+
+\taghieu\ Đây thực chất là bất đẳng thức tam giác viết bằng chữ $d$; không có gì mới về bản chất.
+\vspace{0.3cm}
+\begin{ts}
+\begin{enumerate}[label=\bt{E\arabic*.}, leftmargin=*, itemsep=4pt]
+  \item Tính: $|-7|$; \quad $|3-5|$; \quad $|2-\sqrt5|$.
+  \item Giải (viết đáp án bằng khoảng): a) $|x-2|<3$ \quad b) $|x+1|\le2$ \quad c) $|x|\ge4$ \quad d) $|2x-1|<3$.
+  \item Tính $d(-2,\,5)$. Tìm $x$ để $d(x,3)<0{,}5$.
+  \item Cho $x=-4$, $y=-6$. Tính $|x+y|$ và $|x|+|y|$. Có xảy ra dấu ``$=$'' không? Vì sao?
+\end{enumerate}
+\end{ts}
+\vspace{0.3cm}
+\begin{tcolorbox}[enhanced, breakable, colback=lightmain, colframe=maincolor, arc=5pt, boxrule=1.2pt,
+  coltitle=white, fonttitle=\bfseries, title={TRANG GHI NHỚ BÀI 1 \enspace (chép 1 mặt vào vở)}, left=10pt, right=10pt]
+\begin{itemize}[leftmargin=*, itemsep=3pt, topsep=2pt]
+  \item $\NN\subset\ZZ\subset\QQ\subset\RR$. Số vô tỉ $=\RR\setminus\QQ$. $\sqrt2$ vô tỉ (chứng minh phản chứng).
+  \item $\RR$ là trường (cộng, nhân, chia thoải mái), có thứ tự. Nhân với số \textbf{âm} thì bất đẳng thức \textbf{đổi chiều}.
+  \item $\sup X$ = trần thấp nhất, $\inf X$ = sàn cao nhất. Có $\max$/$\min$ \textbf{khi} $\sup$/$\inf$ thuộc $X$.
+  \item $M^\ast=\sup X\iff M^\ast$ là cận trên và $\forall\eps>0,\ \exists x\in X:\ M^\ast-\eps<x\le M^\ast$.
+  \item \textbf{$\RR$ đầy:} tập khác rỗng bị chặn trên luôn có $\sup\in\RR$ (bị chặn dưới luôn có $\inf\in\RR$). $\QQ$ thì không.
+  \item $\RRb=\RR\cup\{\pm\infty\}$. Không xác định: $\infty-\infty$, $0\cdot\infty$, $\infty/\infty$.
+  \item $[\ \,]$ lấy đầu mút, $(\ \,)$ không lấy; với $\pm\infty$ luôn dùng $(\ \,)$.
+  \item $|x|$ = khoảng cách đến $0$. \ $|x+y|\le|x|+|y|$. \ $|x-a|<\eps\iff a-\eps<x<a+\eps$. \ $d(x,y)=|x-y|$.
+\end{itemize}
+\end{tcolorbox}
+
+% ########################################################
+% ########################################################
+%                        BÀI 2: SỐ PHỨC
+% ########################################################
+% ########################################################
+\bai{BÀI 2. SỐ PHỨC}{BÀI 2. SỐ PHỨC $\boldsymbol{\mathbb{C}}$}{cũng giống bài 1 này được biên soạn lại tổng hợp từ nhiều nguồn }
+
+\begin{hy}[BÀI NÀY NÓI VỀ CÁI GÌ? (đọc 30 giây)]
+Bài 1 cho ta $\RR$ và cách đo ``gần'' bằng $|x-a|<\eps$. Bài 2 mở rộng sang $\CC$ vì ba lý do:
+\begin{enumerate}[label=\textbf{(\arabic*)}, leftmargin=*, itemsep=1pt, topsep=2pt]
+  \item \textbf{Vá chỗ thiếu của $\RR$:} phương trình $x^2+1=0$ vô nghiệm trong $\RR$, còn trong $\CC$ thì giải được.
+  \item \textbf{Chuẩn bị cho Bài 3:} dãy số phức $z_n=x_n+iy_n$ quy về hai dãy số thực $(x_n),(y_n)$, và \textbf{môđun} $|z|$ đóng vai trò của giá trị tuyệt đối.
+  \item \textbf{Công cụ tính toán:} công thức Moivre cho phép khai triển $\cos n\theta$, tuyến tính hóa $\cos^p\theta$ và tính các tổng lượng giác rất gọn.
+\end{enumerate}
+Số phức đã học sơ lược ở THPT nên Phần A, C quen thuộc. \textbf{Phần D, E, F} là chỗ cần chú ý nhất. Xuyên suốt bài chỉ có \textbf{hai ``ngôn ngữ''}: dạng đại số $x+iy$ (hợp với cộng, trừ) và dạng lượng giác $r(\cos\theta+i\sin\theta)$ (hợp với nhân, chia, lũy thừa, căn).
+\end{hy}
+
+\begin{center}
+\renewcommand{\arraystretch}{1.5}
+\renewcommand{\tabularxcolumn}[1]{m{#1}}
+\begin{tabularx}{\textwidth}{@{}>{\centering\arraybackslash\bfseries\color{maincolor}}m{1.5cm} L >{\centering\arraybackslash}m{2.6cm}@{}}
+  \rowcolor{maincolor!15}\textbf{Phần} & \textbf{Nội dung} & \textbf{Mức độ}\\
+  A & Số $i$, dạng đại số, hai số phức bằng nhau & \tagde\\
+  B & Mặt phẳng phức, môđun, acgumen, dạng lượng giác, khoảng cách trong $\CC$ & \tagde\ \tagmoi\\
+  C & Phép toán dạng đại số: cộng, trừ, nhân, chia, liên hợp & \tagde\\
+  D & \textbf{Nhân, chia, lũy thừa dạng lượng giác; công thức Moivre} & \tagmoi\ \tagkho\\
+  E & \textbf{Căn bậc $n$ của số phức; căn bậc $n$ của đơn vị} & \tagmoi\ \tagkho\\
+  F & Ứng dụng vào lượng giác: khai triển, tuyến tính hóa, tính tổng & \tagmoi\ \tagkho\\
+\end{tabularx}
+\end{center}
+\newpage
+
+% ---------------- PHẦN A ----------------
+\phan{SỐ $i$ VÀ DẠNG ĐẠI SỐ}
+
+\muc{A1}{Vì sao phải thêm số $i$? \taghieu}
+
+Trong $\RR$, bình phương của mọi số đều $\ge0$, nên $x^2=-1$ \textbf{vô nghiệm}. Tương tự, tam thức $x^2-2x+5$ không phân tích được thành tích hai nhân tử bậc nhất thực. Ta ``vá'' bằng cách \textbf{thêm một số mới} $i$ thỏa $i^2=-1$:
+
+\begin{center}
+\renewcommand{\arraystretch}{1.4}
+\begin{tabularx}{\textwidth}{@{}c L L c@{}}
+  \rowcolor{maincolor!15}\textbf{Tập cũ} & \textbf{Còn thiếu gì} & \textbf{Cách vá} & \textbf{Tập mới}\\
+  $\RR$ & $x^2+1=0$ vô nghiệm; không khai căn được số âm & thêm $i$ với $i^2=-1$ & $\CC$\\
+\end{tabularx}
+\end{center}
+
+\begin{dn}{Số phức}
+Một \textbf{số phức} là số có dạng
+\[ z=x+iy,\qquad x,y\in\RR,\quad i^2=-1. \]
+\begin{itemize}[leftmargin=*, itemsep=2pt, topsep=2pt]
+  \item $x$ là \textbf{phần thực}: $\Rez z=x$. \quad $y$ là \textbf{phần ảo}: $\Imz z=y$.
+  \item $i$ gọi là \textbf{đơn vị ảo}. Tập tất cả số phức ký hiệu là $\CC$.
+  \item Nếu $y=0$: $z=x$ là số thực. Nếu $x=0$, $y\ne0$: $z=iy$ gọi là \textbf{số ảo thuần túy}. Vậy $\RR\subset\CC$.
+  \item Cách viết $z=x+iy$ gọi là \textbf{dạng đại số} (hay dạng chính tắc).
+\end{itemize}
+\end{dn}
+
+\begin{ly}
+$\Imz z$ là một \textbf{số thực} $y$, \emph{không kèm chữ $i$}. Ví dụ $z=3+2i$ thì $\Rez z=3$, $\Imz z=2$ (không phải $2i$).
+\end{ly}
+
+\muc{A2}{Lũy thừa của $i$ \tagde}
+
+Từ $i^2=-1$ suy ra $i^3=i^2\cdot i=-i$, $i^4=1$. Sau đó \textbf{lặp lại theo chu kỳ 4}:
+\[ i^0=1,\quad i^1=i,\quad i^2=-1,\quad i^3=-i,\quad i^4=1,\quad i^5=i,\ \dots \]
+Vậy $i^n$ chỉ phụ thuộc vào \textbf{số dư của $n$ khi chia cho $4$}.
+
+\muc{A3}{Hai số phức bằng nhau \& $\CC$ không có thứ tự \tagluu}
+
+\begin{tc}{Bằng nhau}
+$x_1+iy_1=x_2+iy_2\iff x_1=x_2$ \textbf{và} $y_1=y_2$ (bằng nhau phần thực, bằng nhau phần ảo).
+\end{tc}
+
+\begin{ly}
+Trong $\CC$ \textbf{không có} quan hệ ``$<$, $>$'' tương thích với phép toán như ở $\RR$, nên \textbf{không viết} $z_1<z_2$ khi có số không thực. Lý do: nếu $i>0$ thì $i^2>0$, tức $-1>0$ (vô lý). Nếu $i<0$ thì $-i>0$ và $(-i)^2>0$, cũng ra $-1>0$ (vô lý). Chỉ so sánh được các \textbf{môđun} (là số thực), xem Phần B.
+\end{ly}
+
+\begin{vd}{Tìm $x,y\in\RR$ để $(2x-1)+(y+3)i=3-i$}
+Cân bằng phần thực và phần ảo:
+$2x-1=3\Rightarrow x=2$; \quad $y+3=-1\Rightarrow y=-4$.
+\end{vd}
+
+\begin{vd}{Giải $z^2-2z+5=0$ trong $\CC$}
+$\Delta'=1-5=-4=(2i)^2$, nên $z=1\pm2i$. Từ đó tam thức phân tích được:
+\[ z^2-2z+5=(z-1-2i)(z-1+2i). \]
+Đây chính là điều ta muốn ở đầu bài. Để ý hai nghiệm là hai số ``đối xứng'' nhau (liên hợp), sẽ giải thích ở Phần C.
+\end{vd}
+
+\begin{ts}
+\begin{enumerate}[label=\bt{A\arabic*.}, leftmargin=*, itemsep=4pt]
+  \item Tính: $i^{15}$; \quad $i^{100}$; \quad $i^{2027}$.
+  \item Tìm $x,y\in\RR$: $(x+2y)+(2x-y)i=5+5i$.
+  \item Giải trong $\CC$: $z^2+2z+10=0$.
+  \item Đúng hay sai? a) Mọi số thực đều là số phức. b) $i>0$. c) $\Imz(3+2i)=2i$. d) $5i$ là số ảo thuần túy.
+\end{enumerate}
+\end{ts}
+
+% ---------------- PHẦN B ----------------
+\phan{MẶT PHẲNG PHỨC, MÔĐUN, ACGUMEN}
+
+\muc{B1}{Biểu diễn hình học \tagde}
+
+Số phức $z=x+iy$ được xác định bởi \textbf{cặp số thực} $(x,y)$, nên ta cho nó ứng với \textbf{điểm} $M(x,y)$ trên mặt phẳng tọa độ $Oxy$. Đây là một song ánh giữa $\CC$ và mặt phẳng. Ta gọi mặt phẳng này là \textbf{mặt phẳng phức}, $M$ là \textbf{ảnh} của $z$, còn $z$ là \textbf{tọa vị} của $M$; véctơ $\overrightarrow{OM}$ cũng gọi là véctơ biểu diễn $z$.
+
+\begin{center}
+\begin{tikzpicture}[font=\small]
+  \draw[->, thick, gray] (-1,0) -- (6,0) node[right] {$x$ (trục thực)};
+  \draw[->, thick, gray] (0,-2.8) -- (0,3.5) node[above] {$y$ (trục ảo)};
+  \draw[dashed, gray] (4,0) -- (4,2.4) -- (0,2.4);
+  \draw[dashed, infocolor] (4,0) -- (4,-2.4);
+  \node[below] at (4,-0.02) {$x$};
+  \node[left] at (-0.02,2.4) {$y$};
+  \draw[->, very thick, maincolor] (0,0) -- (4,2.4);
+  \fill[maincolor] (4,2.4) circle (2.6pt) node[above right] {$M(z)$, \ $z=x+iy$};
+  \draw[->, thick, infocolor] (0,0) -- (4,-2.4);
+  \fill[infocolor] (4,-2.4) circle (2.6pt) node[below right] {$\cj z=x-iy$};
+  \draw[anscolor, thick] (1,0) arc (0:31:1);
+  \node[anscolor] at (1.35,0.3) {$\theta$};
+  \node[maincolor, above left] at (2,1.2) {$r=|z|$};
+\end{tikzpicture}\\[2pt]
+{\small\itshape $r$ là độ dài $OM$, $\theta$ là góc từ tia $Ox$ đến $OM$. Điểm liên hợp $\cj z$ đối xứng với $z$ qua trục thực.}
+\end{center}
+
+\muc{B2}{Môđun và acgumen \tagmoi}
+\vspace{0.3cm}
+\begin{dn}{Môđun, acgumen}
+Cho $z=x+iy\neq0$.
+\begin{itemize}[leftmargin=*, itemsep=2pt, topsep=2pt]
+  \item \textbf{Môđun}: $|z|=r=\sqrt{x^2+y^2}\ \ (\ge0)$, đó là khoảng cách $OM$.
+  \item \textbf{Acgumen}: $\theta=\Arg z$ là số thực thỏa
+  \[ \cos\theta=\frac{x}{|z|},\qquad \sin\theta=\frac{y}{|z|}. \]
+\end{itemize}
+\end{dn}
+\vspace{0.3cm}
+\begin{ly}
+\begin{itemize}[leftmargin=*, itemsep=2pt, topsep=2pt]
+  \item Acgumen \textbf{không duy nhất}: sai khác nhau $2k\pi$, $k\in\ZZ$. Ta thường chọn giá trị trong $(-\pi;\pi]$ hoặc $[0;2\pi)$.
+  \item $\Arg0$ \textbf{không xác định} (điểm $O$ không có hướng).
+  \item Khi $y=0$ thì $|z|=\sqrt{x^2}=|x|$: môđun trùng với giá trị tuyệt đối ở Bài 1.
+\end{itemize}
+\end{ly}
+
+\muc{B3}{Dạng lượng giác \tagmoi}
+
+Từ $x=r\cos\theta$, $y=r\sin\theta$ ta có
+\begin{tc}{Dạng lượng giác \ \tagnho}
+\[ z=r(\cos\theta+i\sin\theta),\qquad r=|z|>0,\ \theta=\Arg z. \]
+Hai số phức dạng lượng giác bằng nhau $\iff$ $r_1=r_2$ và $\theta_1=\theta_2+2k\pi$.
+\end{tc}
+
+\textbf{Giá trị lượng giác cần thuộc} (sẽ dùng suốt bài):
+\begin{center}
+\renewcommand{\arraystretch}{1.4}
+\begin{tabular}{@{}c|cccccc@{}}
+  \rowcolor{maincolor!15}$\theta$ & $0$ & $\frac\pi6$ & $\frac\pi4$ & $\frac\pi3$ & $\frac\pi2$ & $\pi$\\
+  $\cos\theta$ & $1$ & $\frac{\sqrt3}2$ & $\frac{\sqrt2}2$ & $\frac12$ & $0$ & $-1$\\
+  $\sin\theta$ & $0$ & $\frac12$ & $\frac{\sqrt2}2$ & $\frac{\sqrt3}2$ & $1$ & $0$\\
+\end{tabular}
+\end{center}
+
+\textbf{Cách đổi từ dạng đại số sang dạng lượng giác} (3 bước): (1) tính $r=\sqrt{x^2+y^2}$; (2) tính $\cos\theta=x/r$ và $\sin\theta=y/r$; (3) tìm góc $\theta$ thỏa \emph{cả hai}.
+
+\begin{ly}
+\textbf{Đừng chỉ dùng $\tan\theta=y/x$ rồi bấm $\arctan$.} Hàm $\arctan$ chỉ trả về góc trong $(-\frac\pi2;\frac\pi2)$ nên có thể sai nửa mặt phẳng. Ví dụ $z=-1+i$: $\tan\theta=-1$, máy cho $-\frac\pi4$, nhưng điểm $(-1;1)$ nằm ở góc phần tư \textbf{II}, nên đúng là $\theta=\frac{3\pi}4$. Hãy luôn kiểm tra dấu của $\cos$ và $\sin$ (hoặc vẽ điểm lên mặt phẳng).
+\end{ly}
+
+\begin{vd}{Đổi sang dạng lượng giác}
+\begin{itemize}[leftmargin=*, itemsep=2pt, topsep=2pt]
+  \item $1+i$: $r=\sqrt2$, $\cos\theta=\sin\theta=\frac{\sqrt2}2\Rightarrow\theta=\frac\pi4$. Vậy $1+i=\sqrt2\big(\cos\frac\pi4+i\sin\frac\pi4\big)$.
+  \item $-1+\sqrt3\,i$: $r=2$, $\cos\theta=-\frac12$, $\sin\theta=\frac{\sqrt3}2\Rightarrow\theta=\frac{2\pi}3$.
+  \item $-2i$: $r=2$, $\cos\theta=0$, $\sin\theta=-1\Rightarrow\theta=-\frac\pi2$.
+  \item $-3$: $r=3$, $\theta=\pi$.
+\end{itemize}
+Ngược lại: $2\big(\cos\frac\pi3+i\sin\frac\pi3\big)=2\cdot\frac12+2\cdot\frac{\sqrt3}2\,i=1+\sqrt3\,i$.
+\end{vd}
+
+\muc{B4}{Khoảng cách trong $\CC$ \& các tính chất của môđun \tagmoi}
+\vspace{0.3cm}
+\begin{dn}{Khoảng cách}
+$d(z_1,z_2)=|z_1-z_2|$: độ dài đoạn nối hai điểm biểu diễn $z_1,z_2$ (đúng như $d(x,y)=|x-y|$ ở Bài 1).
+\end{dn}
+\vspace{0.3cm}
+\begin{tc}{Tính chất của môđun \ \tagnho}
+\begin{enumerate}[label=\textbf{\arabic*.}, leftmargin=*, itemsep=2pt, topsep=2pt]
+  \item $|z|\ge0$, và $|z|=0\iff z=0$.
+  \item $|z_1z_2|=|z_1|\,|z_2|$; \quad $\left|\dfrac{z_1}{z_2}\right|=\dfrac{|z_1|}{|z_2|}$ \ ($z_2\ne0$). \ (chứng minh ở Phần D)
+  \item \textbf{Bất đẳng thức tam giác:} $|z_1+z_2|\le|z_1|+|z_2|$ \ và \ $\big||z_1|-|z_2|\big|\le|z_1-z_2|$.
+  \item $|\Rez z|\le|z|$ và $|\Imz z|\le|z|$ (vì $x^2\le x^2+y^2$).
+\end{enumerate}
+\end{tc}
+\vspace{0.3cm}
+\begin{hy}[HIỂU Ý: ``gần'' trong $\CC$ trông như thế nào?]
+Ở Bài 1: $|x-a|<\eps\iff x\in(a-\eps;\,a+\eps)$, một \textbf{dải} ôm quanh $a$ trên trục số.\\
+Ở $\CC$: $|z-a|<\eps$ là mọi điểm cách $a$ chưa tới $\eps$, tức là \textbf{hình tròn mở tâm $a$, bán kính $\eps$}. Tính chất 4 cho biết: nếu $z_n$ gần $l$ thì phần thực và phần ảo của $z_n$ cũng gần phần thực và phần ảo của $l$. Đó là lý do dãy số phức quy về hai dãy số thực ở Bài 3.
+\end{hy}
+\vspace{0.3cm}
+\begin{ts}
+\begin{enumerate}[label=\bt{B\arabic*.}, leftmargin=*, itemsep=4pt]
+  \item Tìm môđun và một acgumen của: a) $3i$ \quad b) $-2$ \quad c) $1-i$ \quad d) $-\sqrt3-i$.
+  \item Viết dạng lượng giác của $1+\sqrt3\,i$ và $-1+i$. Viết dạng đại số của $4\big(\cos\frac\pi6+i\sin\frac\pi6\big)$ và $2\big(\cos\frac{3\pi}2+i\sin\frac{3\pi}2\big)$.
+  \item Mô tả tập hợp các điểm $M(z)$ thỏa: a) $|z|=2$ \quad b) $|z-1|<1$ \quad c) $\Rez z=1$.
+  \item Chỉ ra chỗ sai: ``$z=-1+i$ có $\tan\theta=-1$ nên $\theta=-\frac\pi4$''.
+\end{enumerate}
+\end{ts}
+
+% ---------------- PHẦN C ----------------
+\phan{PHÉP TOÁN DẠNG ĐẠI SỐ}
+
+\muc{C1}{Cộng, trừ, nhân \tagde}
+
+Cứ tính như với biểu thức đại số bình thường, \textbf{chỉ cần nhớ $i^2=-1$}:
+
+\begin{tc}{Cộng, trừ, nhân}
+\begin{align*}
+(x_1+iy_1)\pm(x_2+iy_2)&=(x_1\pm x_2)+i(y_1\pm y_2),\\
+(x_1+iy_1)(x_2+iy_2)&=(x_1x_2-y_1y_2)+i(x_1y_2+x_2y_1).
+\end{align*}
+\end{tc}
+
+Hình học: cộng hai số phức = cộng hai véctơ (quy tắc hình bình hành).
+
+\begin{vd}{Tính $(2+3i)(1-i)$}
+$(2+3i)(1-i)=2-2i+3i-3i^2=2+i+3=5+i$.
+\end{vd}
+
+\muc{C2}{Số phức liên hợp, số phức đối \tagde}
+
+\begin{dn}{Liên hợp, đối}
+Cho $z=x+iy$.
+\begin{itemize}[leftmargin=*, itemsep=2pt, topsep=2pt]
+  \item \textbf{Liên hợp}: $\cj z=x-iy$ (đối xứng với $z$ qua trục thực).
+  \item \textbf{Đối}: $-z=-x-iy$ (đối xứng với $z$ qua gốc $O$).
+\end{itemize}
+Với dạng lượng giác: $z=r(\cos\theta+i\sin\theta)\Rightarrow \cj z=r\big(\cos(-\theta)+i\sin(-\theta)\big)$, \ $-z=r\big(\cos(\theta+\pi)+i\sin(\theta+\pi)\big)$.
+\end{dn}
+
+\begin{tc}{Tính chất của phép liên hợp \ \tagnho}
+\begin{enumerate}[label=\textbf{\arabic*.}, leftmargin=*, itemsep=2pt, topsep=2pt]
+  \item $\cj{\cj z}=z$, \quad $|\cj z|=|z|$.
+  \item $\cj{z_1\pm z_2}=\cj{z_1}\pm\cj{z_2}$.
+  \item $\cj{z_1z_2}=\cj{z_1}\,\cj{z_2}$; \quad mở rộng: $\cj{z^n}=(\cj z)^n$.
+  \item $\cj{\left(\dfrac{z_1}{z_2}\right)}=\dfrac{\cj{z_1}}{\cj{z_2}}$ \ ($z_2\ne0$).
+  \item $z+\cj z=2\Rez z$, \quad $z-\cj z=2i\,\Imz z$.
+  \item $z\in\RR\iff z=\cj z$; \quad $z$ ảo thuần túy $\iff z=-\cj z$.
+  \item $\boxed{\,z\,\cj z=x^2+y^2=|z|^2\,}$ \quad (quan trọng nhất).
+\end{enumerate}
+\end{tc}
+
+\begin{hy}[HIỂU Ý: liên hợp dùng để làm gì?]
+(1) \textbf{Đổi mẫu phức thành mẫu thực}: nhân với $\cj z$ thì $z\cj z=|z|^2$ là số thực (xem C3).\\
+(2) Từ tính chất 2, 3: nếu đa thức $P$ có \emph{hệ số thực} thì $P(\cj z)=\cj{P(z)}$. Vậy $z_0$ là nghiệm thì $\cj{z_0}$ cũng là nghiệm. Đó là lý do nghiệm $1\pm2i$ ở Ví dụ 2 đi theo cặp.
+\end{hy}
+
+\muc{C3}{Phép chia \tagde}
+
+\begin{tc}{Phép chia}
+\[ \frac{z_1}{z_2}=\frac{z_1\,\cj{z_2}}{z_2\,\cj{z_2}}=\frac{z_1\,\cj{z_2}}{|z_2|^2},\qquad \frac1z=\frac{\cj z}{|z|^2}\quad(z\neq0). \]
+\end{tc}
+
+\textbf{Cách làm:} nhân cả tử và mẫu với \textbf{liên hợp của mẫu}.
+
+\begin{vd}{Chia và giải phương trình}
+\begin{itemize}[leftmargin=*, itemsep=3pt, topsep=2pt]
+  \item $\dfrac{2+3i}{1-i}=\dfrac{(2+3i)(1+i)}{(1-i)(1+i)}=\dfrac{2+2i+3i-3}{2}=\dfrac{-1+5i}{2}$.
+  \item Giải $(1+2i)z=3-i$: $z=\dfrac{3-i}{1+2i}=\dfrac{(3-i)(1-2i)}{5}=\dfrac{3-6i-i-2}{5}=\dfrac{1-7i}{5}$.
+\end{itemize}
+\end{vd}
+
+\begin{ts}
+\begin{enumerate}[label=\bt{C\arabic*.}, leftmargin=*, itemsep=4pt]
+  \item Tính: a) $(3-2i)+(1+5i)$ \quad b) $(2+i)(3-4i)$ \quad c) $(1+i)^2$ \quad d) $(1-i)^4$.
+  \item Cho $z=3-4i$. Tìm $\cj z$, $|z|$ và kiểm tra $z\cj z=|z|^2$.
+  \item Tính: a) $\dfrac1{1+2i}$ \quad b) $\dfrac{1+i}{1-i}$ \quad c) $\dfrac{2+3i}{1+i}$.
+  \item Giải: $(2-i)z+3i=4$.
+  \item Chứng minh: nếu $|z|=1$ thì $\dfrac1z=\cj z$.
+\end{enumerate}
+\end{ts}
+
+% ---------------- PHẦN D ----------------
+\phan{NHÂN, CHIA, LŨY THỪA DẠNG LƯỢNG GIÁC \ \tagkho}
+
+\muc{D1}{Nhân và chia \tagmoi}
+
+Dạng đại số nhân thì phải khai triển, còn dạng lượng giác nhân thì cực gọn:
+
+\begin{tc}{Nhân, chia dạng lượng giác \ \tagnho}
+Với $z_1=r_1(\cos\theta_1+i\sin\theta_1)$, $z_2=r_2(\cos\theta_2+i\sin\theta_2)$:
+\begin{align*}
+z_1z_2&=r_1r_2\big[\cos(\theta_1+\theta_2)+i\sin(\theta_1+\theta_2)\big],\\
+\frac{z_1}{z_2}&=\frac{r_1}{r_2}\big[\cos(\theta_1-\theta_2)+i\sin(\theta_1-\theta_2)\big]\quad(z_2\ne0).
+\end{align*}
+Nói gọn: \textbf{nhân thì môđun nhân, acgumen cộng; chia thì môđun chia, acgumen trừ}.
+\end{tc}
+
+\textbf{Vì sao đúng?} Khai triển rồi dùng công thức cộng:
+\[(\cos\alpha+i\sin\alpha)(\cos\beta+i\sin\beta)=(\cos\alpha\cos\beta-\sin\alpha\sin\beta)+i(\sin\alpha\cos\beta+\cos\alpha\sin\beta)=\cos(\alpha+\beta)+i\sin(\alpha+\beta).\]
+
+\textbf{Hệ quả:} $|z_1z_2|=|z_1||z_2|$, \ $\left|\frac{z_1}{z_2}\right|=\frac{|z_1|}{|z_2|}$, \ $\Arg(z_1z_2)=\Arg z_1+\Arg z_2$ \ (sai khác $2k\pi$).
+
+\begin{hy}[HIỂU Ý: nhân với số phức = quay + co giãn]
+Nhân $z$ với $w=\rho(\cos\varphi+i\sin\varphi)$: điểm $z$ bị \textbf{quay góc $\varphi$} quanh $O$ rồi \textbf{co/giãn $\rho$ lần}. Ví dụ nhân với $i$ ($\rho=1$, $\varphi=\frac\pi2$) là quay $90^\circ$ ngược chiều kim đồng hồ: $1\mapsto i\mapsto-1\mapsto-i\mapsto1$. Đó chính là chu kỳ 4 của $i^n$ ở A2.
+\end{hy}
+
+\muc{D2}{Công thức Moivre \tagmoi\ \tagkho}
+
+Nhân liên tiếp $n$ lần cùng một số phức, dùng quy nạp từ D1:
+
+\begin{tc}{Công thức Moivre \ \tagnho}
+Với $z=r(\cos\theta+i\sin\theta)$ và $n\in\ZZ$:
+\[ z^n=r^n\big(\cos n\theta+i\sin n\theta\big),\qquad\text{đặc biệt}\quad(\cos\theta+i\sin\theta)^n=\cos n\theta+i\sin n\theta. \]
+\end{tc}
+\vspace{0.3cm}
+\begin{hy}[HIỂU Ý: ký hiệu $e^{i\theta}$ cho gọn]
+Ta \textbf{quy ước} $e^{i\theta}:=\cos\theta+i\sin\theta$ (đến Chương IV sẽ chứng minh bằng chuỗi lũy thừa, giờ cứ coi là ký hiệu). Khi đó
+\[ z=re^{i\theta},\qquad e^{i\alpha}e^{i\beta}=e^{i(\alpha+\beta)},\qquad (e^{i\theta})^n=e^{in\theta},\qquad \cj{e^{i\theta}}=e^{-i\theta}=\frac1{e^{i\theta}}. \]
+Nó ``chạy'' đúng như luật lũy thừa quen thuộc nên rất dễ nhớ. Từ đây ta dùng nó khi tiện.
+\end{hy}
+
+\muc{D3}{Ví dụ mẫu}
+
+\begin{vd}{Tính $z=(1+i)(1+\sqrt3\,i)(\sqrt3-i)$}
+Đổi từng thừa số sang dạng lượng giác:
+$1+i=\sqrt2\,e^{i\pi/4}$; \ $1+\sqrt3\,i=2e^{i\pi/3}$; \ $\sqrt3-i=2e^{-i\pi/6}$.\\
+Nhân: môđun $\sqrt2\cdot2\cdot2=4\sqrt2$; acgumen $\frac\pi4+\frac\pi3-\frac\pi6=\frac{5\pi}{12}$. Vậy
+\[ z=4\sqrt2\,e^{i5\pi/12}. \]
+\textbf{Kiểm tra bằng đại số:} $(1+i)(1+\sqrt3 i)=(1-\sqrt3)+(1+\sqrt3)i$, nhân tiếp với $(\sqrt3-i)$ ra $z=2(\sqrt3-1)+2(\sqrt3+1)i$. Phần thực $2\sqrt3-2=4\sqrt2\cos\frac{5\pi}{12}$ khớp (vì $\cos\frac{5\pi}{12}=\frac{\sqrt6-\sqrt2}4$).
+\end{vd}
+\vspace{0.3cm}
+\begin{vd}{Tính $z=\dfrac{\sqrt3+i}{1-i}$ và $(1+i)^{20}$}
+$\sqrt3+i=2e^{i\pi/6}$, \ $1-i=\sqrt2\,e^{-i\pi/4}$. Chia: môđun $\frac2{\sqrt2}=\sqrt2$, acgumen $\frac\pi6-(-\frac\pi4)=\frac{5\pi}{12}$. Vậy $z=\sqrt2\,e^{i5\pi/12}$.\\
+$(1+i)^{20}=\big(\sqrt2\big)^{20}\big(\cos5\pi+i\sin5\pi\big)=2^{10}\cdot(-1)=-1024$.
+\end{vd}
+
+\begin{vd}{Môđun và acgumen của $z=\dfrac{(\sqrt3+i)^{200}}{(1+i)^{100}}$}
+Đặt $z_1=1+i$ ($|z_1|=\sqrt2$, $\Arg=\frac\pi4$), $z_2=\sqrt3+i$ ($|z_2|=2$, $\Arg=\frac\pi6$). Theo Moivre:
+\[|z|=\frac{2^{200}}{(\sqrt2)^{100}}=\frac{2^{200}}{2^{50}}=2^{150},\qquad \Arg z=200\cdot\frac\pi6-100\cdot\frac\pi4=\frac{100\pi}3-25\pi=\frac{25\pi}3\equiv\frac\pi3\pmod{2\pi}.\]
+\textbf{Mẹo:} acgumen to cỡ nào cũng \emph{trừ bớt bội của $2\pi$} ở bước cuối ($\frac{25\pi}3=8\pi+\frac\pi3$).
+\end{vd}
+
+\begin{tcolorbox}[enhanced, breakable, colback=lightmain, colframe=maincolor, arc=4pt, boxrule=0.9pt, title={\bfseries\small NÊN DÙNG DẠNG NÀO?}, coltitle=white, left=9pt, right=9pt]
+\renewcommand{\arraystretch}{1.4}
+\begin{tabularx}{\textwidth}{@{}L L@{}}
+  \textbf{\color{maincolor}Dạng đại số $x+iy$} & \textbf{\color{maincolor}Dạng lượng giác $re^{i\theta}$}\\
+  cộng, trừ, chia (nhân liên hợp), giải phương trình bậc nhất, bậc hai & nhân, chia, \textbf{lũy thừa cao}, \textbf{khai căn}, bài toán về góc/quay\\
+\end{tabularx}
+\end{tcolorbox}
+
+\begin{ts}
+\begin{enumerate}[label=\bt{D\arabic*.}, leftmargin=*, itemsep=4pt]
+  \item Tính: a) $(1+i)^8$ \quad b) $(\sqrt3-i)^6$.
+  \item Tính $(1-i)(\sqrt3+i)$ bằng \emph{hai cách} (đại số và lượng giác), từ đó suy ra giá trị của $\cos\frac\pi{12}$ và $\sin\frac\pi{12}$.
+  \item Tìm môđun và acgumen của $z=\dfrac{(1-i)^{10}}{(\sqrt3+i)^6}$. Từ đó viết $z$ ở dạng đại số.
+  \item Chứng minh: $|z_1+z_2|^2+|z_1-z_2|^2=2\big(|z_1|^2+|z_2|^2\big)$. \textit{(Gợi ý: dùng $|w|^2=w\cj w$.)}
+\end{enumerate}
+\end{ts}
+
+% ---------------- PHẦN E ----------------
+\phan{KHAI CĂN BẬC $n$ \ \tagkho}
+
+\muc{E1}{Căn bậc $n$ của số phức \tagmoi\ \tagkho}
+
+\begin{dn}{Căn bậc $n$}
+$w\in\CC$ là một \textbf{căn bậc $n$} của $z$ nếu $w^n=z$ ($n\in\Ns$).
+\end{dn}
+
+\textbf{Tìm công thức:} cho $z=r(\cos\theta+i\sin\theta)\ne0$, đặt $w=\rho(\cos\varphi+i\sin\varphi)$. Theo Moivre, $w^n=\rho^n(\cos n\varphi+i\sin n\varphi)$. Cho bằng $z$:
+\[ \rho^n=r,\qquad n\varphi=\theta+2k\pi. \]
+
+\begin{tc}{Công thức khai căn \ \tagnho}
+Số $z=r(\cos\theta+i\sin\theta)\ne0$ có \textbf{đúng $n$} căn bậc $n$:
+\[ w_k=\sqrt[n]{r}\left[\cos\frac{\theta+2k\pi}{n}+i\sin\frac{\theta+2k\pi}{n}\right],\qquad k=0,1,\dots,n-1. \]
+(Dạng mũ: $w_k=\sqrt[n]{r}\,e^{i(\theta+2k\pi)/n}$.)
+\end{tc}
+
+\textbf{Vì sao chỉ $k=0,\dots,n-1$?} Với $k=n$ thì góc tăng thêm đúng $2\pi$, ra lại $w_0$; các $k$ khác tiếp tục lặp.
+
+\begin{center}
+\begin{tikzpicture}[font=\small]
+  \draw[->, gray] (-2.4,0) -- (2.6,0); \draw[->, gray] (0,-2.2) -- (0,2.4);
+  \draw[maincolor, thick] (0,0) circle (1.8);
+  \draw[maincolor, fill=maincolor!10] (30:1.8) -- (120:1.8) -- (210:1.8) -- (300:1.8) -- cycle;
+  \draw[badgecolor, dashed] (1.8,0) -- (0,0) -- (30:1.8);
+  \foreach \k in {0,1,2,3} \fill[anscolor] ({30+90*\k}:1.8) circle (2.6pt);
+  \node[anscolor, above right] at (30:1.8) {$w_0$};
+  \node[anscolor, above left] at (120:1.8) {$w_1$};
+  \node[anscolor, below left] at (210:1.8) {$w_2$};
+  \node[anscolor, below right] at (300:1.8) {$w_3$};
+  \draw[badgecolor, thick] (1,0) arc (0:30:1); \node[badgecolor] at (1.35,0.25) {$\frac\theta n$};
+\end{tikzpicture}\\[2pt]
+{\small\itshape Các căn bậc $4$ của $z$ nằm trên đường tròn bán kính $\sqrt[4]{r}$, là $4$ đỉnh của một hình vuông, liên tiếp cách nhau góc $\frac{2\pi}{4}$.}
+\end{center}
+
+\begin{ly}
+Ở $\RR$, ký hiệu $\sqrt4=2$ chỉ \emph{một} số. Ở $\CC$ số $4$ có \textbf{hai} căn bậc hai là $\pm2$. Vì vậy trong $\CC$ hãy viết ``\emph{các căn bậc $n$ của $z$}'' và liệt kê đủ $n$ giá trị, đừng viết $\sqrt[n]{z}$ như một số duy nhất. Riêng $z=0$ chỉ có căn bậc $n$ là $0$.
+\end{ly}
+
+\begin{vd}{Tìm các căn bậc $4$ của $-1+\sqrt3\,i$}
+$-1+\sqrt3\,i=2\big(\cos\frac{2\pi}3+i\sin\frac{2\pi}3\big)$. Ở đây $r=2$, $\theta=\frac{2\pi}3$, $n=4$:
+\[ w_k=\sqrt[4]2\left[\cos\Big(\frac\pi6+\frac{k\pi}2\Big)+i\sin\Big(\frac\pi6+\frac{k\pi}2\Big)\right],\quad k=0,1,2,3. \]
+Cụ thể ($\sqrt[4]2$ là nhân tử chung):
+$w_0=\sqrt[4]2\big(\frac{\sqrt3}2+\frac i2\big)$, \ $w_1=\sqrt[4]2\big(-\frac12+\frac{\sqrt3}2 i\big)$, \ $w_2=-w_0$, \ $w_3=-w_1$.
+\end{vd}
+
+\begin{vd}{Giải $z^4=-4$}
+$-4=4(\cos\pi+i\sin\pi)$, nên $|z|=\sqrt2$ và $\arg z=\frac{\pi+2k\pi}4=\frac\pi4+\frac{k\pi}2$:
+\[ z\in\{\,1+i,\ -1+i,\ -1-i,\ 1-i\,\}. \]
+Kiểm tra: $(1+i)^4=\big((1+i)^2\big)^2=(2i)^2=-4$. \checkmark
+\end{vd}
+
+\begin{vd}{Căn bậc hai của số phức ở dạng đại số (không cần lượng giác)}
+Tìm $w=a+bi$ ($a,b\in\RR$) với $w^2=-3+4i$. Cân bằng hai vế, thêm điều kiện môđun $|w|^2=|{-3+4i}|=5$:
+\[ a^2-b^2=-3,\quad 2ab=4,\quad a^2+b^2=5\ \Rightarrow\ a^2=1,\ b^2=4,\ ab>0. \]
+Vậy $w=\pm(1+2i)$. Kiểm tra: $(1+2i)^2=1+4i-4=-3+4i$. \checkmark
+\end{vd}
+
+\muc{E2}{Căn bậc $n$ của đơn vị \tagmoi}
+
+Với $z=1$ ($r=1$, $\theta=0$), công thức E1 cho
+\[ \omega_k=\cos\frac{2k\pi}n+i\sin\frac{2k\pi}n=e^{2k\pi i/n},\qquad k=0,1,\dots,n-1. \]
+
+\begin{tc}{Tính chất của $\omega_k$ \ \tagnho}
+\begin{enumerate}[label=\textbf{\arabic*.}, leftmargin=*, itemsep=2pt, topsep=2pt]
+  \item $\omega_k^n=1$; \quad $\omega_k=\omega_1^k$ (chỉ cần biết $\omega_1$, các số còn lại là lũy thừa của nó).
+  \item $\cj{\omega_k}=\omega_k^{-1}=\omega_{n-k}$.
+  \item Với $n\ge2$: \ $\omega_0+\omega_1+\cdots+\omega_{n-1}=0$. \ Tổng quát: nếu $\omega\ne1$, $\omega^n=1$ thì $1+\omega+\cdots+\omega^{n-1}=\dfrac{1-\omega^n}{1-\omega}=0$.
+  \item $\omega_k$ là các \textbf{đỉnh của đa giác đều $n$ cạnh} nội tiếp đường tròn đơn vị, có một đỉnh là $1$.
+\end{enumerate}
+\end{tc}
+
+\begin{center}
+\begin{tikzpicture}[font=\small]
+  \begin{scope}
+    \draw[gray!60] (-1.8,0) -- (1.8,0); \draw[gray!60] (0,-1.8) -- (0,1.8);
+    \draw[maincolor, thick] (0,0) circle (1.4);
+    \draw[maincolor, fill=maincolor!10] (0:1.4) -- (120:1.4) -- (240:1.4) -- cycle;
+    \foreach \k in {0,1,2} {\fill[anscolor] ({120*\k}:1.4) circle (2.5pt); \node at ({1.85*cos(120*\k)},{1.85*sin(120*\k)}) {$\omega_{\k}$};}
+    \node at (0,-2.3) {$n=3$};
+  \end{scope}
+  \begin{scope}[xshift=5.6cm]
+    \draw[gray!60] (-1.8,0) -- (1.8,0); \draw[gray!60] (0,-1.8) -- (0,1.8);
+    \draw[maincolor, thick] (0,0) circle (1.4);
+    \draw[maincolor, fill=maincolor!10] (0:1.4) -- (90:1.4) -- (180:1.4) -- (270:1.4) -- cycle;
+    \foreach \k in {0,1,2,3} {\fill[anscolor] ({90*\k}:1.4) circle (2.5pt); \node at ({1.85*cos(90*\k)},{1.85*sin(90*\k)}) {$\omega_{\k}$};}
+    \node at (0,-2.3) {$n=4$};
+  \end{scope}
+  \begin{scope}[xshift=11.2cm]
+    \draw[gray!60] (-1.8,0) -- (1.8,0); \draw[gray!60] (0,-1.8) -- (0,1.8);
+    \draw[maincolor, thick] (0,0) circle (1.4);
+    \draw[maincolor, fill=maincolor!10] (0:1.4) -- (60:1.4) -- (120:1.4) -- (180:1.4) -- (240:1.4) -- (300:1.4) -- cycle;
+    \foreach \k in {0,1,2,3,4,5} {\fill[anscolor] ({60*\k}:1.4) circle (2.5pt); \node at ({1.9*cos(60*\k)},{1.9*sin(60*\k)}) {\scriptsize$\omega_{\k}$};}
+    \node at (0,-2.3) {$n=6$};
+  \end{scope}
+\end{tikzpicture}
+\end{center}
+
+\textbf{Giá trị cần nhớ:} $n=2$: $\pm1$. \quad $n=3$: $1,\ -\frac12+\frac{\sqrt3}2i,\ -\frac12-\frac{\sqrt3}2i$. \quad $n=4$: $1,\ i,\ -1,\ -i$.
+
+\begin{hy}[HIỂU Ý: mọi căn bậc $n$ đều ``sinh'' từ $\omega_k$]
+Nếu $w_0$ là \emph{một} căn bậc $n$ của $z$ thì \emph{tất cả} căn bậc $n$ của $z$ là $w_0\omega_0,\,w_0\omega_1,\dots,w_0\omega_{n-1}$ (vì $(w_0\omega_k)^n=w_0^n\cdot1=z$). Hình học: quay $w_0$ đi các góc $\frac{2\pi}n$ liên tiếp.
+\end{hy}
+
+\begin{ts}
+\begin{enumerate}[label=\bt{E\arabic*.}, leftmargin=*, itemsep=4pt]
+  \item Tìm căn bậc hai của $5+12i$ (dạng đại số).
+  \item Giải $z^3=-8$ trong $\CC$ (viết nghiệm dạng đại số).
+  \item Liệt kê $6$ căn bậc $6$ của $1$ dưới dạng đại số.
+  \item Giải $z^3=\cj z$ trong $\CC$. \textit{(Gợi ý: nhân hai vế với $z$.)}
+  \item Cho $\omega=\cos\frac\pi3+i\sin\frac\pi3$. Tính $1+\omega+\omega^2+\omega^3+\omega^4+\omega^5$.
+\end{enumerate}
+\end{ts}
+\newpage
+% ---------------- PHẦN F ----------------
+\phan{ỨNG DỤNG VÀO LƯỢNG GIÁC \ \tagkho}
+
+\begin{hy}[PHẦN NÀY DÙNG ĐỂ LÀM GÌ?]
+Công thức Moivre biến các bài lượng giác ``rối'' thành tính toán với lũy thừa. Có ba kỹ thuật, mỗi kỹ thuật chỉ là một ý: \textbf{(F1)} khai triển $(\cos\theta+i\sin\theta)^n$ bằng nhị thức Newton rồi lấy phần thực/phần ảo; \textbf{(F2)} đặt $z=e^{i\theta}$ rồi khai triển $(z\pm\frac1z)^p$; \textbf{(F3)} dùng tổng cấp số nhân hoặc nhị thức cho số phức rồi lấy phần thực/ảo.
+\end{hy}
+
+\muc{F1}{Khai triển $\cos n\theta$, $\sin n\theta$ theo $\cos\theta,\sin\theta$ \tagmoi}
+
+Từ Moivre và nhị thức Newton:
+\[ \cos n\theta+i\sin n\theta=(\cos\theta+i\sin\theta)^n=\sum_{k=0}^{n}C_n^k\cos^{n-k}\theta\,(i\sin\theta)^k. \]
+Vì $i^k$ lần lượt là $1,i,-1,-i,\dots$ nên \textbf{các số hạng $k$ chẵn là phần thực, $k$ lẻ là phần ảo}:
+\begin{align*}
+\cos n\theta&=\cos^n\theta-C_n^2\cos^{n-2}\theta\sin^2\theta+C_n^4\cos^{n-4}\theta\sin^4\theta-\cdots\\
+\sin n\theta&=C_n^1\cos^{n-1}\theta\sin\theta-C_n^3\cos^{n-3}\theta\sin^3\theta+\cdots
+\end{align*}
+Sau đó thay $\sin^2\theta=1-\cos^2\theta$ thì $\cos n\theta$ thành \textbf{đa thức của $\cos\theta$} (đa thức Chebyshev loại 1), còn $\sin n\theta=\sin\theta\cdot(\text{đa thức của }\cos\theta)$.
+
+\begin{vd}{Khai triển $\cos3\theta$ và $\sin3\theta$ ($n=3$)}
+$(\cos\theta+i\sin\theta)^3=\cos^3\theta+3i\cos^2\theta\sin\theta-3\cos\theta\sin^2\theta-i\sin^3\theta$. Lấy phần thực và phần ảo:
+\[\cos3\theta=\cos^3\theta-3\cos\theta\sin^2\theta=4\cos^3\theta-3\cos\theta,\qquad \sin3\theta=3\cos^2\theta\sin\theta-\sin^3\theta=3\sin\theta-4\sin^3\theta.\]
+(Với $n=2$ cùng cách này ra $\cos2\theta=\cos^2\theta-\sin^2\theta$, $\sin2\theta=2\sin\theta\cos\theta$: các công thức quen thuộc.)
+\end{vd}
+
+\muc{F2}{Tuyến tính hóa $\cos^p\theta$, $\sin^p\theta$ \tagmoi\ \tagkho}
+
+\textbf{Ý tưởng:} biến lũy thừa của $\cos$/$\sin$ thành \emph{tổng} các $\cos k\theta$, $\sin k\theta$. Đặt $z=e^{i\theta}$ ($|z|=1$ nên $\frac1z=\cj z$):
+\[ z+\frac1z=2\cos\theta,\qquad z-\frac1z=2i\sin\theta,\qquad z^m+\frac1{z^m}=2\cos m\theta,\qquad z^m-\frac1{z^m}=2i\sin m\theta. \]
+
+\begin{tc}{Quy trình tuyến tính hóa \ \tagnho}
+\begin{enumerate}[label=\textbf{Bước \arabic*.}, leftmargin=*, itemsep=2pt, topsep=2pt]
+  \item Viết $(2\cos\theta)^p=\big(z+\tfrac1z\big)^p$ (hoặc $(2i\sin\theta)^p=\big(z-\tfrac1z\big)^p$).
+  \item Khai triển nhị thức: $\big(z+\tfrac1z\big)^p=\sum_{k=0}^{p}C_p^k\,z^{p-2k}$.
+  \item \textbf{Ghép cặp} số hạng $z^m$ và $z^{-m}$ thành $2\cos m\theta$ (hoặc $2i\sin m\theta$).
+\end{enumerate}
+Với tích $\cos^p\theta\sin^q\theta$: tuyến tính hóa từng thừa số rồi nhân, hoặc khai triển trực tiếp \newline$\big(z+\tfrac1z\big)^p\big(z-\tfrac1z\big)^q$.
+\end{tc}
+
+\begin{vd}{Tuyến tính hóa $\cos^3\theta$, $\sin^3\theta$, $\cos^4\theta$}
+\begin{itemize}[leftmargin=*, itemsep=3pt, topsep=2pt]
+  \item $(2\cos\theta)^3=z^3+3z+\frac3z+\frac1{z^3}=2\cos3\theta+6\cos\theta$. Vậy $\ \cos^3\theta=\dfrac{\cos3\theta+3\cos\theta}4$.
+  \item $(2i\sin\theta)^3=z^3-3z+\frac3z-\frac1{z^3}=2i\sin3\theta-6i\sin\theta$. Vì $(2i)^3=-8i$ nên $\ \sin^3\theta=\dfrac{3\sin\theta-\sin3\theta}4$.
+  \item $(2\cos\theta)^4=z^4+4z^2+6+\frac4{z^2}+\frac1{z^4}=2\cos4\theta+8\cos2\theta+6$. Vậy $\ \cos^4\theta=\dfrac{\cos4\theta+4\cos2\theta+3}8$.
+\end{itemize}
+Sự hữu ích: nhờ đó \textbf{nguyên hàm} và \textbf{tổng} của $\cos^p$, $\sin^p$ trở nên dễ tính.
+\end{vd}
+
+\muc{F3}{Tính tổng lượng giác \tagmoi\ \tagkho}
+\vspace{0.3cm}
+\begin{tc}{Hai tổng cần biết \ \tagnho}
+Với $a,b\in\RR$:
+\begin{enumerate}[label=\textbf{\arabic*.}, leftmargin=*, itemsep=3pt, topsep=2pt]
+  \item Nếu $b\ne2m\pi$:
+  \[\sum_{k=0}^{n}\cos(a+kb)=\frac{\sin\frac{(n+1)b}2}{\sin\frac b2}\cos\Big(a+\frac{nb}2\Big),\qquad \sum_{k=0}^{n}\sin(a+kb)=\frac{\sin\frac{(n+1)b}2}{\sin\frac b2}\sin\Big(a+\frac{nb}2\Big).\]
+  \item \[\sum_{k=0}^{n}C_n^k\cos(a+kb)=\Big(2\cos\frac b2\Big)^n\cos\Big(a+\frac{nb}2\Big),\qquad \sum_{k=0}^{n}C_n^k\sin(a+kb)=\Big(2\cos\frac b2\Big)^n\sin\Big(a+\frac{nb}2\Big).\]
+\end{enumerate}
+\end{tc}
+\vspace{0.4cm}
+\textbf{Cách chứng minh (đây mới là điều cần nhớ):} xét tổng số phức $C+iS=\sum e^{i(a+kb)}$, tính nó, rồi lấy phần thực ($C$) và phần ảo ($S$).
+\begin{itemize}[leftmargin=*, itemsep=3pt, topsep=2pt]
+  \item \textbf{Tổng 1} là cấp số nhân công bội $e^{ib}\ne1$:
+  \[\sum_{k=0}^ne^{i(a+kb)}=e^{ia}\frac{1-e^{i(n+1)b}}{1-e^{ib}}=e^{ia}\frac{e^{i(n+1)b/2}\big(-2i\sin\frac{(n+1)b}2\big)}{e^{ib/2}\big(-2i\sin\frac b2\big)}=e^{i(a+nb/2)}\frac{\sin\frac{(n+1)b}2}{\sin\frac b2}.\]
+  (Mẹo: $1-e^{i\alpha}=e^{i\alpha/2}\big(e^{-i\alpha/2}-e^{i\alpha/2}\big)=-2i\sin\frac\alpha2\,e^{i\alpha/2}$.)
+  \item \textbf{Tổng 2} dùng nhị thức Newton: $\sum_{k=0}^nC_n^ke^{i(a+kb)}=e^{ia}\big(1+e^{ib}\big)^n$, mà $1+e^{ib}=e^{ib/2}\big(e^{-ib/2}+e^{ib/2}\big)=2\cos\frac b2\,e^{ib/2}$.
+\end{itemize}
+\vspace{0.4cm}
+\begin{vd}{Tính $\displaystyle\sum_{k=0}^nC_n^k\cos k\theta$}
+Lấy $a=0$, $b=\theta$ ở công thức 2: tổng bằng $\big(2\cos\frac\theta2\big)^n\cos\frac{n\theta}2=2^n\cos^n\frac\theta2\cos\frac{n\theta}2$.
+\end{vd}
+\vspace{0.4cm}
+\begin{ts}
+\begin{enumerate}[label=\bt{F\arabic*.}, leftmargin=*, itemsep=4pt]
+  \item Biểu diễn $\cos4\theta$ qua $\cos\theta$.
+  \item Tuyến tính hóa: a) $\sin^4\theta$ \quad b) $\cos^5\theta$.
+  \item Tính $S=\cos\theta+\cos2\theta+\cdots+\cos n\theta$ (với $\theta\ne2m\pi$). \textit{(Gợi ý: viết dưới dạng $\sum_{k=0}^{n-1}\cos(\theta+k\theta)$.)}
+  \item Tính $\displaystyle\sum_{k=0}^nC_n^k\sin k\theta$.
+\end{enumerate}
+\end{ts}
+
+\vspace{0.3cm}
+\begin{tcolorbox}[enhanced, breakable, colback=lightmain, colframe=maincolor, arc=5pt, boxrule=1.2pt,
+  coltitle=white, fonttitle=\bfseries, title={TRANG GHI NHỚ BÀI 2 \enspace (chép 1 mặt vào vở)}, left=10pt, right=10pt]
+\begin{itemize}[leftmargin=*, itemsep=3pt, topsep=2pt]
+  \item $z=x+iy$, $i^2=-1$; $\Rez z=x$, $\Imz z=y$ (số thực). $i^n$ tuần hoàn chu kỳ $4$: $1,i,-1,-i$. $\CC$ \textbf{không có thứ tự}.
+  \item $|z|=\sqrt{x^2+y^2}$; $\Arg z=\theta$ với $\cos\theta=\frac xr$, $\sin\theta=\frac yr$ (sai khác $2k\pi$; $\Arg0$ không xác định). Đổi dạng: kiểm tra \emph{cả} $\cos$ và $\sin$.
+  \item $z=r(\cos\theta+i\sin\theta)=re^{i\theta}$. \ $d(z_1,z_2)=|z_1-z_2|$; $|z-a|<\eps$ là hình tròn tâm $a$ bán kính $\eps$. \ $|z_1+z_2|\le|z_1|+|z_2|$.
+  \item $\cj z=x-iy$; $z\cj z=|z|^2$; $\ \frac{z_1}{z_2}=\frac{z_1\cj{z_2}}{|z_2|^2}$; $\ \cj{z_1z_2}=\cj{z_1}\cj{z_2}$; $z\in\RR\iff z=\cj z$.
+  \item Nhân: \textbf{môđun nhân, acgumen cộng}. Chia: môđun chia, acgumen trừ. Moivre: $z^n=r^n(\cos n\theta+i\sin n\theta)$.
+  \item \textbf{Căn bậc $n$} của $z=r(\cos\theta+i\sin\theta)$: $w_k=\sqrt[n]r\,e^{i(\theta+2k\pi)/n}$, $k=0,\dots,n-1$ ($n$ giá trị, là đỉnh đa giác đều).
+  \item \textbf{Căn bậc $n$ của $1$:} $\omega_k=e^{2k\pi i/n}$; $\cj{\omega_k}=\omega_{n-k}$; $\sum\omega_k=0$ ($n\ge2$).
+  \item Lượng giác: $\cos n\theta+i\sin n\theta=(\cos\theta+i\sin\theta)^n$; $\ z=e^{i\theta}\Rightarrow z^m\pm z^{-m}=2\cos m\theta$ hoặc $2i\sin m\theta$; $\ \sum_{k=0}^ne^{i(a+kb)}$ là cấp số nhân.
+\end{itemize}
+\end{tcolorbox}
+
+% ########################################################
+% ########################################################
+%                    BÀI 3: DÃY SỐ THỰC
+% ########################################################
+% ########################################################
+\bai{BÀI 3. DÃY SỐ THỰC}{BÀI 3. DÃY SỐ THỰC}{Tài liệu tự học, tự soạn, tổng hợp từ sách và các nguồn khác}
+
+\begin{hy}[BÀI NÀY NÓI VỀ CÁI GÌ? (đọc 30 giây)]
+Bài 1 cho ta $\RR$ và cách đo ``gần'' bằng $|x-a|<\eps$. Bài 2 cho ta $\CC$ với môđun $|z|$ đóng vai trò giá trị tuyệt đối. Bài 3 là chỗ \textbf{``gần'' được dùng thật sự}: một dãy số $u_0,u_1,u_2,\dots$ ``tiến dần'' về $a$ nghĩa là gì? Bài này quan trọng vì ba lý do:
+\begin{enumerate}[label=\textbf{(\arabic*)}, leftmargin=*, itemsep=1pt, topsep=2pt]
+  \item \textbf{Mọi khái niệm giải tích về sau đều quy về giới hạn dãy:} giới hạn hàm số, liên tục, đạo hàm, tích phân, chuỗi\dots{} đều được định nghĩa hoặc kiểm tra bằng dãy.
+  \item \textbf{Học cách chứng minh bằng $\eps$--$n_0$:} đây là ``ngôn ngữ'' của Giải tích. Quen được nó thì các chương sau nhẹ hơn nhiều.
+  \item \textbf{Có một bộ công cụ nhỏ mà mạnh:} tính chất đại số, nguyên lý kẹp, dãy đơn điệu bị chặn, dãy kề nhau, dãy con. Bài toán nào cũng chọn một trong số đó.
+\end{enumerate}
+Phần A khó nhất về mặt tư duy (định nghĩa $\eps$--$n_0$), các phần sau là \textbf{dùng} định nghĩa đó. Nếu chỉ đọc kỹ một phần, hãy đọc kỹ \textbf{Phần A}.
+\end{hy}
+
+\begin{center}
+\renewcommand{\arraystretch}{1.5}
+\renewcommand{\tabularxcolumn}[1]{m{#1}}
+\begin{tabularx}{\textwidth}{@{}>{\centering\arraybackslash\bfseries\color{maincolor}}m{1.5cm} L >{\centering\arraybackslash}m{2.6cm}@{}}
+  \rowcolor{maincolor!15}\textbf{Phần} & \textbf{Nội dung} & \textbf{Mức độ}\\
+  A & Dãy số, định nghĩa hội tụ ($\eps$--$n_0$), phân kì, giới hạn vô cực & \tagmoi\ \tagkho\\
+  B & Dãy bị chặn & \tagde\\
+  C & Tính chất dãy hội tụ: duy nhất, bị chặn, đại số, thứ tự, \textbf{nguyên lý kẹp} & \tagmoi\\
+  D & Các giới hạn cơ bản: $a^n$, $\sqrt[n]{a}$, $n^k/a^n$, $a^n/n!$ & \tagmoi\ \tagkho\\
+  E & Dãy đơn điệu, dãy kề nhau, \textbf{số $e$} & \tagmoi\ \tagkho\\
+  F & Dãy con, Bolzano--Weierstrass, nguyên lý Cauchy & \tagmoi\ \tagkho\\
+\end{tabularx}
+\end{center}
+\newpage
+
+% ---------------- PHẦN A ----------------
+\phan{DÃY SỐ VÀ ĐỊNH NGHĨA HỘI TỤ}
+
+\muc{A1}{Dãy số thực là gì? \taghieu}
+\vspace{0.5cm}
+\begin{dn}{Dãy số thực}
+Một \textbf{dãy số thực} là một ánh xạ $u:\NN\to\RR$, $n\mapsto u_n$. Người ta viết gọn là $(u_n)$ hay $(u_n)_{n\ge0}$.
+\begin{itemize}[leftmargin=*, itemsep=2pt, topsep=2pt]
+  \item $u_{n_0}$ là \textbf{số hạng thứ $n_0$} của dãy; $u_n$ (một biểu thức theo $n$) gọi là \textbf{số hạng tổng quát}.
+  \item Có khi dãy chỉ xác định từ $n\ge1$ hoặc $n\ge n_1$ nào đó (ví dụ $\frac1n$ không có $n=0$). Điều này không ảnh hưởng gì đến chuyện hội tụ, vì hữu hạn số hạng đầu không quyết định giới hạn.
+\end{itemize}
+\end{dn}
+\vspace{0.3cm}
+\begin{center}
+\renewcommand{\arraystretch}{1.5}
+\begin{tabularx}{\textwidth}{@{}L L L@{}}
+  \rowcolor{maincolor!15}\textbf{Tên gọi} & \textbf{Số hạng tổng quát} & \textbf{Các số hạng đầu}\\
+  Dãy hằng & $u_n=1$ & $1,1,1,1,\dots$\\
+  Dãy điều hòa & $u_n=\dfrac1n\ (n\ge1)$ & $1,\frac12,\frac13,\frac14,\dots$\\
+  Dãy đổi dấu & $u_n=(-1)^n$ & $1,-1,1,-1,\dots$\\
+  Dãy $e_n$ (sẽ học ở E3) & $u_n=\Big(1+\dfrac1n\Big)^n$ & $2,\ 2{,}25,\ 2{,}37,\dots$\\
+\end{tabularx}
+\end{center}
+\vspace{0.4cm}
+\begin{hy}[HIỂU Ý: câu hỏi trung tâm của cả bài]
+Nhìn bốn dãy trên bằng mắt: dãy $\frac1n$ ``tiến dần về $0$''; dãy $(-1)^n$ cứ nhảy qua nhảy lại nên ``không tiến về đâu''; dãy hằng thì ``đứng yên ở $1$''. \textbf{Mục tiêu của Phần A} là biến cảm giác ``tiến dần'' này thành một định nghĩa chính xác, đủ để chứng minh được.
+\end{hy}
+\vspace{0.3cm}
+\muc{A2}{Định nghĩa hội tụ \tagmoi\ \tagkho}
+\vspace{0.3cm}
+\begin{dn}{Dãy hội tụ}
+Dãy $(u_n)$ \textbf{hội tụ về} $a\in\RR$ nếu
+\[ \boxed{\ (\forall\eps>0)\ (\exists n_0\in\NN)\ (\forall n\ge n_0)\ :\ |u_n-a|<\eps\ } \]
+Ký hiệu $\displaystyle\lim_{n\to\infty}u_n=a$ (hay $u_n\to a$). Số $a$ gọi là \textbf{giới hạn} của dãy. Dãy $(u_n)$ gọi là \textbf{hội tụ} nếu tồn tại $a\in\RR$ để $u_n\to a$.
+\end{dn}
+
+\newpage
+
+\begin{hy}[HIỂU Ý: đọc câu định nghĩa như một ``cuộc chơi'' hai người]
+Hãy tưởng tượng người A và người B chơi một trò:
+\begin{center}
+\renewcommand{\arraystretch}{1.5}
+\begin{tabularx}{\textwidth}{@{}>{\bfseries\color{maincolor}}l L L@{}}
+  \rowcolor{maincolor!15}\textbf{Ký hiệu} & \textbf{Đọc là} & \textbf{Ai ``chơi''}\\
+  $\forall\eps>0$ & ``bạn đưa ra \emph{bất kỳ} sai số $\eps$ nào, nhỏ cỡ nào cũng được'' & A (đối thủ, muốn bắt bẻ)\\
+  $\exists n_0$ & ``tôi tìm được một \emph{mốc} $n_0$'' & B (người chứng minh)\\
+  $\forall n\ge n_0$ & ``từ mốc đó trở đi, \emph{mọi} số hạng'' & B\\
+  $|u_n-a|<\eps$ & ``đều cách $a$ chưa tới $\eps$'' & kết luận\\
+\end{tabularx}
+\end{center}
+\textbf{Người chứng minh thắng} nếu với \emph{mọi} $\eps$ A đưa ra, B đều tìm được mốc $n_0$. Chú ý: \textbf{$n_0$ phụ thuộc vào $\eps$}; $\eps$ càng bé thì mốc $n_0$ thường càng lớn.\\[3pt]
+Bằng hình học: $|u_n-a|<\eps\iff u_n\in(a-\eps;a+\eps)$ (Bài 1). Vậy hội tụ về $a$ nghĩa là: \textbf{với mọi dải hẹp quanh $a$, chỉ có hữu hạn số hạng nằm ngoài dải}.
+\end{hy}
+\vspace{0.4cm}
+\begin{center}
+\begin{tikzpicture}[font=\small]
+  \draw[->, gray] (0,0) -- (8.4,0) node[right] {$n$};
+  \draw[->, gray] (0,-0.2) -- (0,3.4) node[above] {$u_n$};
+  \fill[maincolor!12] (0,1.9) rectangle (8,2.7);
+  \draw[maincolor, dashed] (0,2.3) -- (8,2.3) node[right] {$a$};
+  \draw[maincolor] (0,2.7) -- (8,2.7) node[right] {$a+\eps$};
+  \draw[maincolor] (0,1.9) -- (8,1.9) node[right] {$a-\eps$};
+  \draw[anscolor, dashed] (2,0) -- (2,3.3);
+  \node[anscolor, below] at (2,0) {$n_0$};
+  \foreach \k in {1,...,15} {
+    \pgfmathsetmacro{\px}{0.5*\k}
+    \pgfmathsetmacro{\py}{2.3+cos(180*\k)*1.2/\k}
+    \fill[infocolor] (\px,\py) circle (1.8pt);
+  }
+\end{tikzpicture}\\[2pt]
+{\small\itshape Với $\eps$ cho trước, từ $n_0$ trở đi mọi điểm $(n,u_n)$ nằm trong dải $a\pm\eps$. Vài số hạng đầu nằm ngoài dải thì không sao.}
+\end{center}
+\vspace{0.4cm}
+\begin{ly}
+\begin{itemize}[leftmargin=*, itemsep=2pt, topsep=2pt]
+  \item $u_n\to a\iff u_n-a\to0\iff|u_n-a|\to0$. Vì vậy ``chứng minh hội tụ'' thường quy về ``chứng minh một dãy dương tiến về $0$''.
+  \item Thay đổi, thêm hoặc bớt \emph{hữu hạn} số hạng đầu không làm đổi tính hội tụ lẫn giới hạn.
+  \item Đừng nhầm ``$u_n$ tiến về $a$'' với ``$u_n$ giảm dần'' hay ``$u_n\ne a$''. Dãy hằng $u_n=1$ hội tụ về $1$ và $u_n$ có thể bằng $a$ vô số lần.
+\end{itemize}
+\end{ly}
+\newpage
+\muc{A3}{Phân kì và giới hạn vô cực \tagmoi}
+\vspace{0.3cm}
+\begin{dn}{Dãy phân kì, giới hạn $\pm\infty$}
+\begin{itemize}[leftmargin=*, itemsep=3pt, topsep=2pt]
+  \item $(u_n)$ \textbf{phân kì} nếu nó \emph{không hội tụ}, tức là
+  \[ (\forall a\in\RR)\ (\exists\eps>0)\ (\forall n_0)\ (\exists n\ge n_0)\ :\ |u_n-a|\ge\eps. \]
+  \item $u_n\to+\infty$ nếu $(\forall A>0)\,(\exists n_0)\,(\forall n\ge n_0)\ :\ u_n>A$.
+  \item $u_n\to-\infty$ nếu $(\forall B<0)\,(\exists n_0)\,(\forall n\ge n_0)\ :\ u_n<B$.
+\end{itemize}
+Theo giáo trình, dãy có giới hạn $\pm\infty$ \textbf{cũng gọi là phân kì} (vì giới hạn không phải là số thực).
+\end{dn}
+\vspace{0.3cm}
+\begin{hy}[HIỂU Ý: cách phủ định một câu có $\forall,\exists$]
+Quy tắc: \textbf{đổi $\forall\leftrightarrow\exists$ và phủ định phần cuối}. Ví dụ phủ định của ``$\forall\eps\ \exists n_0\ \forall n\ge n_0:\ |u_n-a|<\eps$'' là ``$\exists\eps\ \forall n_0\ \exists n\ge n_0:\ |u_n-a|\ge\eps$'', nghĩa là \emph{có một dải hẹp mà dãy cứ vô hạn lần chui ra ngoài}.
+\end{hy}
+\begin{center}
+\renewcommand{\arraystretch}{1.5}
+\begin{tabularx}{\textwidth}{@{}L L L@{}}
+  \rowcolor{maincolor!15}\textbf{Kiểu dãy} & \textbf{Ví dụ} & \textbf{Gọi là}\\
+  Tiến về số thực & $\frac1n\to0$ & hội tụ\\
+  Tiến ra vô cực & $n^2\to+\infty$ & phân kì (giới hạn $+\infty$)\\
+  Không tiến về đâu & $(-1)^n$ & phân kì (không có giới hạn)\\
+\end{tabularx}
+\end{center}
+\vspace{0.3cm}
+\muc{A4}{Cách chứng minh bằng định nghĩa: ``nháp ngược'' \tagnho\ \tagkho}
+
+Muốn chứng minh $u_n\to a$ bằng định nghĩa, ta làm \textbf{3 bước}:
+\begin{enumerate}[label=\textbf{Bước \arabic*.}, leftmargin=*, itemsep=2pt, topsep=2pt]
+  \item Tính $|u_n-a|$ và \textbf{rút gọn} (quy đồng, nhân liên hợp, \dots).
+  \item \textbf{Nháp:} giải bất đẳng thức $|u_n-a|<\eps$ \emph{theo $n$} (hoặc phóng đại $|u_n-a|\le\dots$ bằng một biểu thức đơn giản rồi giải) để tìm điều kiện $n>\text{(một biểu thức của }\eps)$.
+  \item \textbf{Viết bài:} chọn $n_0$ thỏa điều kiện đó, rồi kết luận ``với mọi $n\ge n_0$ thì $|u_n-a|<\eps$''.
+\end{enumerate}
+\vspace{0.3cm}
+\begin{vd}{Chứng minh $\displaystyle\limn\frac1n=0$}
+Cho $\eps>0$. Ta có $\big|\frac1n-0\big|=\frac1n<\eps\iff n>\frac1\eps$. Chọn $n_0=\EE\big(\frac1\eps\big)+1$ (với $\EE(x)$ là phần nguyên của $x$, tức là số nguyên lớn nhất $\le x$). Khi đó $n\ge n_0>\frac1\eps$ nên $\frac1n<\eps$.
+\end{vd}
+
+\begin{vd}{Chứng minh $\displaystyle\limn\frac{2n+1}{n+3}=2$}
+\emph{Nháp:} $\Big|\dfrac{2n+1}{n+3}-2\Big|=\dfrac{5}{n+3}<\dfrac5n$. Để $\dfrac5n<\eps$ chỉ cần $n>\dfrac5\eps$.\\\\
+\emph{Viết bài:} Cho $\eps>0$, chọn $n_0=\EE\big(\frac5\eps\big)+1$. Với $n\ge n_0$: $\big|\frac{2n+1}{n+3}-2\big|<\frac5n<\eps$. \\\\
+\textbf{Bài học:} ta được phép \emph{phóng đại} $\frac5{n+3}<\frac5n$ cho dễ giải, miễn là vế lớn hơn vẫn nhỏ hơn $\eps$.
+\end{vd}
+\vspace{0.3cm}
+
+\begin{vd}{Chứng minh $\displaystyle\limn n^2=+\infty$}
+Cho $A>0$. Với $n\ge1$ có $n^2\ge n$, nên $n^2>A$ khi $n>A$. Chọn $n_0=\EE(A)+1$. Với $n\ge n_0$ thì $n^2\ge n>A$. 
+\end{vd}
+\vspace{0.4cm}
+\begin{hy}[HIỂU Ý: dãy số phức quy về hai dãy số thực]
+Nhờ Bài 2, ta mở rộng được sang $\CC$: dãy số phức $z_n=x_n+iy_n$ (với $(x_n),(y_n)$ là hai dãy thực) hội tụ về $l=a+ib$ nghĩa là $|z_n-l|<\eps$ (hình tròn mở tâm $l$). Vì
+\[ \max\big(|x_n-a|,\,|y_n-b|\big)\ \le\ |z_n-l|\ \le\ |x_n-a|+|y_n-b|, \]
+(tính chất $|\Rez w|,|\Imz w|\le|w|$ ở Bài 2, và bất đẳng thức tam giác), nên
+\[ z_n\to l\iff x_n\to a\ \text{ và }\ y_n\to b. \]
+Mọi kết quả trong bài này (cho dãy thực) vì vậy dùng được cho dãy phức, \emph{trừ} những chỗ dùng thứ tự ``$<$'' (vì $\CC$ không có thứ tự).
+\end{hy}
+\vspace{0.4cm}
+\begin{ts}
+\begin{enumerate}[label=\bt{A\arabic*.}, leftmargin=*, itemsep=4pt]
+  \item Chứng minh bằng định nghĩa $\displaystyle\limn\frac{3n+1}{n+2}=3$. Tìm một $n_0$ cụ thể ứng với $\eps=0{,}01$.
+  \item Viết bằng ký hiệu mệnh đề ``$(u_n)$ \textbf{không} hội tụ về $0$''. Áp dụng cho $u_n=(-1)^n$ (chỉ ra một $\eps$ cụ thể).
+  \item Chứng minh bằng định nghĩa $\displaystyle\limn\frac{(-1)^n}n=0$.
+  \item Chứng minh bằng định nghĩa $\displaystyle\limn(n^2-3)=+\infty$.
+\end{enumerate}
+\end{ts}
+
+% ---------------- PHẦN B ----------------
+\phan{DÃY BỊ CHẶN}
+
+\muc{B1}{Định nghĩa \tagde}
+\vspace{0.4cm}
+\begin{dn}{Dãy bị chặn}
+\begin{itemize}[leftmargin=*, itemsep=2pt, topsep=2pt]
+  \item $(u_n)$ \textbf{bị chặn trên} bởi $A$ nếu $\forall n:\ u_n\le A$.
+  \item $(u_n)$ \textbf{bị chặn dưới} bởi $B$ nếu $\forall n:\ u_n\ge B$.
+  \item $(u_n)$ \textbf{bị chặn} nếu $\exists M>0$ sao cho $\forall n:\ |u_n|\le M$ (tức là bị chặn cả trên lẫn dưới).
+\end{itemize}
+\end{dn}
+
+\begin{center}
+\renewcommand{\arraystretch}{1.5}
+\begin{tabularx}{\textwidth}{@{}L L@{}}
+  \rowcolor{maincolor!15}\textbf{Dãy} & \textbf{Tình trạng}\\
+  $u_n=\frac1n$ & bị chặn: $0<u_n\le1$\\
+  $u_n=n^2$ & chặn dưới (bởi $0$), \emph{không} chặn trên\\
+  $u_n=(-1)^n$ & bị chặn: $|u_n|=1$\\
+  $u_n=(-1)^nn$ & không chặn trên, không chặn dưới\\
+\end{tabularx}
+\end{center}
+
+\begin{ly}
+``Bị chặn'' chỉ nói các số hạng \emph{không chạy ra xa vô cùng}, \textbf{không} nói chúng tiến về một số. Dãy $(-1)^n$ bị chặn nhưng không hội tụ. Mối quan hệ đúng ở Phần C: \emph{hội tụ $\Rightarrow$ bị chặn} (chiều ngược lại \textbf{sai}).
+\end{ly}
+\vspace{0.3cm}
+\begin{ts}
+\begin{enumerate}[label=\bt{B\arabic*.}, leftmargin=*, itemsep=4pt]
+  \item Xét tính bị chặn của: a) $u_n=\sin n$ \quad b) $u_n=\dfrac{n}{n+1}$ \quad c) $u_n=2^n$ \quad d) $u_n=n\,(-1)^n$.
+  \item Đúng hay sai (giải thích bằng ví dụ nếu sai)? \\
+  a) Dãy bị chặn thì hội tụ. \quad b) Dãy không bị chặn thì phân kì. \quad c) Dãy $u_n\to+\infty$ thì không bị chặn trên. \quad d) Dãy không bị chặn trên thì $u_n\to+\infty$.
+\end{enumerate}
+\end{ts}
+
+% ---------------- PHẦN C ----------------
+\phan{TÍNH CHẤT CỦA DÃY HỘI TỤ}
+
+\begin{hy}[HIỂU Ý: tại sao cần phần này?]
+Chứng minh bằng định nghĩa ($\eps$--$n_0$) cho từng dãy thì rất mệt. Phần C cho \textbf{các quy tắc chung} (giống như bảng đạo hàm ở lớp 12): biết giới hạn của vài dãy cơ bản, ta tính được giới hạn của các dãy phức tạp hơn mà \emph{không cần quay lại $\eps$} nữa.
+\end{hy}
+\newpage
+\muc{C1}{Giới hạn là duy nhất \tagnho}
+
+\begin{tc}{Định lí 1.1 (tính duy nhất)}
+Nếu $u_n\to a$ thì $a$ là \textbf{duy nhất}.
+\end{tc}
+
+\textbf{Ý chứng minh:} giả sử $u_n\to a_1$ và $u_n\to a_2$ với $a_1\ne a_2$. Lấy $\eps=\frac13|a_1-a_2|$. Từ một chỉ số nào đó trở đi, $u_n$ vừa cách $a_1$ chưa tới $\eps$, vừa cách $a_2$ chưa tới $\eps$. Suy ra
+\[ |a_1-a_2|\le|a_1-u_n|+|u_n-a_2|<2\eps=\tfrac23|a_1-a_2|, \]
+vô lý (vì $|a_1-a_2|>0$). Vậy $a_1=a_2$.
+
+\muc{C2}{Hội tụ thì bị chặn \tagnho}
+
+\begin{tc}{Tính bị chặn}
+\begin{enumerate}[label=\textbf{\arabic*.}, leftmargin=*, itemsep=2pt, topsep=2pt]
+  \item $(u_n)$ hội tụ $\Rightarrow$ $(u_n)$ bị chặn.
+  \item $u_n\to+\infty\Rightarrow(u_n)$ bị chặn dưới. \quad 3. $u_n\to-\infty\Rightarrow(u_n)$ bị chặn trên.
+\end{enumerate}
+\end{tc}
+
+\textbf{Chứng minh ý 1:} giả sử $u_n\to a$. Lấy $\eps=1$: tồn tại $n_0$ sao cho $\forall n\ge n_0:\ |u_n-a|<1$, tức $|u_n|<|a|+1$. Chỉ còn \emph{hữu hạn} số hạng $u_0,\dots,u_{n_0-1}$, nên lấy
+\[ M=\max\{|u_0|,\dots,|u_{n_0-1}|,\ |a|+1\}\ \Rightarrow\ |u_n|\le M\ \ \forall n. \]
+(Ý 2 làm tương tự với $\min$; ý 3 áp dụng ý 2 cho $(-u_n)$.)
+
+\begin{ly}
+\begin{itemize}[leftmargin=*, itemsep=2pt, topsep=2pt]
+  \item \textbf{Bị chặn nhưng chưa chắc hội tụ:} $u_n=(-1)^n$.
+  \item \textbf{Mọi dãy không bị chặn đều phân kì} (phản đảo của ý 1). Đây là cách nhanh để chứng minh phân kì.
+  \item $u_n\to+\infty\Rightarrow$ không bị chặn trên, nhưng \textbf{chiều ngược lại sai}: dãy $u_n=(-1)^nn$ không bị chặn trên mà cũng không tiến tới $+\infty$ (số hạng chẵn $\to+\infty$, số hạng lẻ $\to-\infty$).
+\end{itemize}
+\end{ly}
+
+\muc{C3}{Tính chất đại số \tagnho}
+
+\begin{tc}{Phép toán và giới hạn}
+Giả sử $u_n\to a$, $v_n\to b$ ($a,b\in\RR$). Khi đó
+\begin{enumerate}[label=\textbf{\arabic*.}, leftmargin=*, itemsep=2pt, topsep=2pt]
+  \item $|u_n|\to|a|$. \quad (và $u_n\to0\iff|u_n|\to0$)
+  \item $u_n+v_n\to a+b$. \quad 3. $\lambda u_n\to\lambda a$ ($\lambda$ hằng số). \quad 4. $u_nv_n\to ab$.
+  \item Nếu $b\ne0$ thì $\dfrac{u_n}{v_n}\to\dfrac ab$ (từ một chỉ số nào đó thì $v_n\ne0$).
+  \item \textbf{``Vô cùng bé nhân bị chặn'':} nếu $u_n\to0$ và $(v_n)$ \emph{bị chặn} thì $u_nv_n\to0$.
+\end{enumerate}
+\end{tc}
+
+\textbf{Ý chứng minh phép cộng:} cho $\eps>0$, có $n_1$ để $|u_n-a|<\frac\eps2$ ($n\ge n_1$), có $n_2$ để $|v_n-b|<\frac\eps2$ ($n\ge n_2$). Lấy $n_0=\max(n_1,n_2)$ thì với $n\ge n_0$: $|(u_n+v_n)-(a+b)|\le|u_n-a|+|v_n-b|<\eps$. (\emph{Chia $\eps$ làm hai nửa} là mẹo chung của loại chứng minh này.)
+
+\begin{hy}[HIỂU Ý: tính chất 6 hay bị bỏ quên mà rất hữu ích]
+Nếu $u_n\to0$ thì $u_n\cdot(\text{bất kỳ dãy bị chặn})\to0$, \emph{kể cả khi dãy bị chặn kia không hội tụ}. Ví dụ $\frac{\sin n}{n}=\frac1n\cdot\sin n\to0$ vì $\frac1n\to0$ và $|\sin n|\le1$. Phép nhân này \textbf{không} dùng được tính chất 4 (vì $\sin n$ không hội tụ).
+\end{hy}
+\vspace{0.2cm}
+\begin{ly}
+Các quy tắc trên \textbf{chỉ áp dụng khi các giới hạn thành phần tồn tại (là số thực)}. Với dạng ``vô định'' như $\infty-\infty$, $\frac00$, $\frac\infty\infty$, $0\cdot\infty$ thì phải biến đổi trước (chia cho lũy thừa cao nhất, nhân liên hợp, \dots). Ví dụ $\frac{n^2}{n}$ có dạng $\frac\infty\infty$ nhưng bằng $n\to+\infty$, còn $\frac{n}{n^2}\to0$.
+\end{ly}
+\begin{vd}{Chia cho lũy thừa cao nhất}
+$\displaystyle\frac{3n^2+n}{2n^2-5}=\frac{3+\frac1n}{2-\frac5{n^2}}\to\frac{3+0}{2-0}=\frac32.$
+\end{vd}
+\vspace{0.2cm}
+\begin{vd}{Nhân liên hợp}
+$\displaystyle\sqrt{n+1}-\sqrt n=\frac{(n+1)-n}{\sqrt{n+1}+\sqrt n}=\frac1{\sqrt{n+1}+\sqrt n}\to0.$
+\end{vd}
+
+\muc{C4}{Tính chất thứ tự và nguyên lý kẹp \tagnho\ \tagluu}
+
+\begin{tc}{Thứ tự và giới hạn}
+Giả sử $u_n\to l$.
+\begin{enumerate}[label=\textbf{\arabic*.}, leftmargin=*, itemsep=3pt, topsep=2pt]
+  \item Nếu $l\in(a;b)$ thì tồn tại $n_0$ sao cho $\forall n\ge n_0:\ a<u_n<b$. \ (\emph{Giới hạn nằm trong khoảng nào thì từ một lúc nào đó dãy cũng nằm trong khoảng đó}).
+  \item Nếu $\forall n\ge n_0:\ a\le u_n\le b$ thì $a\le l\le b$. \ (\emph{Qua giới hạn, bất đẳng thức giữ nguyên nhưng}\ \textbf{không còn ngặt}).
+  \item \textbf{Nguyên lý kẹp:} nếu $u_n\le v_n\le w_n$ từ một chỉ số nào đó trở đi và $u_n\to a$, $w_n\to a$ thì $v_n\to a$.
+  \item Nếu $u_n\le v_n$ từ một chỉ số nào đó trở đi và $u_n\to+\infty$ thì $v_n\to+\infty$. \ (Tương tự, $v_n\le u_n$ và $u_n\to-\infty$ thì $v_n\to-\infty$.)
+\end{enumerate}
+\end{tc}
+\vspace{0.3cm}
+\begin{ly}
+Ý 2: $u_n>0$ với mọi $n$ \textbf{không suy ra} $l>0$, chỉ suy ra $l\ge0$. Ví dụ $u_n=\frac1n>0$ nhưng $l=0$.
+\end{ly}
+\vspace{0.3cm}
+\begin{hy}[HIỂU Ý: kẹp = ``hai người bạn kẹp một người''. Dùng thế nào?]
+Nếu dãy $v_n$ nằm giữa hai dãy cùng tiến về $a$ thì $v_n$ không còn chỗ nào để đi ngoài $a$. Hai dạng dùng nhiều nhất:\\
+\textbf{(i)} Đánh giá $|u_n-a|\le\alpha_n$ với $\alpha_n\to0$ thì $u_n\to a$.\\
+\textbf{(ii)} Tổng nhiều số hạng: thay mọi số hạng bằng số hạng \emph{bé nhất} (cận dưới) và \emph{lớn nhất} (cận trên).
+\end{hy}
+
+\begin{vd}{Dùng kẹp cho tổng nhiều số hạng}
+Tìm $\displaystyle\limn u_n$ với $u_n=\sum_{k=1}^n\frac{n}{n^2+k}$.\\
+Với $1\le k\le n$: $\dfrac n{n^2+n}\le\dfrac n{n^2+k}\le\dfrac n{n^2+1}$. Cộng $n$ số hạng:
+\[ \frac{n^2}{n^2+n}\ \le\ u_n\ \le\ \frac{n^2}{n^2+1}. \]
+Cả hai vế đều $\to1$ (chia cho $n^2$), nên $u_n\to1$.
+\end{vd}
+
+\begin{ts}
+\begin{enumerate}[label=\bt{C\arabic*.}, leftmargin=*, itemsep=4pt]
+  \item Tính: a) $\dfrac{3n^2+n}{2n^2-5}$ \quad b) $\sqrt{n+1}-\sqrt n$ \quad c) $\dfrac{2^n+3^n}{3^{n+1}}$ \quad d) $\dfrac{\sin n}n$.
+  \item Tính $\displaystyle\limn\sum_{k=1}^n\frac1{\sqrt{n^2+k}}$ bằng nguyên lý kẹp.
+  \item Chứng minh: nếu $u_n\to a$ thì $|u_n|\to|a|$. Chiều ngược lại có đúng không? Khi nào thì đúng?
+  \item Cho $u_n\to a$ với $a>0$. Chứng minh tồn tại $n_0$ sao cho $\forall n\ge n_0:\ u_n>\frac a2$.
+\end{enumerate}
+\end{ts}
+\vspace{0.4cm}
+% ---------------- PHẦN D ----------------
+\phan{CÁC GIỚI HẠN CƠ BẢN \ \tagkho}
+
+\begin{hy}[HIỂU Ý: ``từ điển giới hạn'' để dùng cả đời]
+Gặp bài tính giới hạn, thường ta quy về các dãy dưới đây rồi dùng Phần C. Tất cả đều chứng minh được từ \textbf{khai triển nhị thức Newton} $(1+h)^n=\sum_{k=0}^nC_n^kh^k$ với $h>0$ (các số hạng đều dương nên $(1+h)^n\ge$ bất kỳ số hạng nào, hoặc tổng của vài số hạng).
+\end{hy}
+\vspace{0.4cm}
+\newpage
+\muc{D1}{Giới hạn của $a^n$ \tagnho}
+\vspace{0.2cm}
+\begin{tc}{Dãy lũy thừa}
+\[ \limn a^n=\begin{cases}0,&|a|<1,\\ 1,&a=1,\\ +\infty,&a>1,\\ \text{không tồn tại (phân kì)},&a\le-1.\end{cases} \]
+\end{tc}
+\vspace{0.2cm}
+\textbf{Chứng minh ($a>1$):} đặt $a=1+h$, $h>0$. Theo Newton $a^n\ge1+nh\to+\infty$, nên $a^n\to+\infty$ (tính chất 4 ở C4).\\
+\textbf{Trường hợp $0<|a|<1$:} $\frac1{|a|}>1$ nên $\big(\frac1{|a|}\big)^n\to+\infty$, suy ra $|a|^n\to0$, do đó $a^n\to0$. Với $a=0$ thì $a^n=0$ hiển nhiên.\\
+\textbf{Trường hợp $a\le-1$:} $|a^n|=|a|^n\ge1$ không chặn hoặc đổi dấu liên tục, nên dãy phân kì (xem thêm Phần F).
+\vspace{0.2cm}
+\muc{D2}{Giới hạn của $\sqrt[n]{a}$ và $\sqrt[n]{n}$ \tagnho}
+\vspace{0.2cm}
+\begin{tc}{Căn bậc $n$}
+\begin{enumerate}[label=\textbf{\arabic*.}, leftmargin=*, itemsep=2pt, topsep=2pt]
+  \item Với $a>0$: $\ \displaystyle\limn a^{1/n}=1$.
+  \item $\displaystyle\limn n^{1/n}=1$.
+\end{enumerate}
+\end{tc}
+\vspace{0.2cm}
+\textbf{Chứng minh ý 1:} xét $a>1$. Đặt $a^{1/n}=1+h_n$, $h_n>0$. Theo Newton $a=(1+h_n)^n\ge1+nh_n$, suy ra $0<h_n\le\frac{a-1}n\to0$. Vậy $a^{1/n}\to1$ (kẹp). Với $0<a<1$: $a^{1/n}=1/\big((1/a)^{1/n}\big)\to\frac11=1$. Với $a=1$ hiển nhiên.\\
+\textbf{Chứng minh ý 2:} đặt $n^{1/n}=1+h_n$, $h_n\ge0$ ($n\ge2$). Khi đó $n=(1+h_n)^n\ge1+\frac{n(n-1)}2h_n^2>\frac{n(n-1)}2h_n^2$, nên $h_n^2<\frac2{n-1}\to0$. Do đó $h_n\to0$, $n^{1/n}\to1$.
+\vspace{0.2cm}
+\muc{D3}{Hàm mũ tăng nhanh hơn lũy thừa; giai thừa tăng nhanh hơn hàm mũ \tagnho\ \tagkho}
+
+\begin{tc}{So sánh tốc độ tăng}
+\begin{enumerate}[label=\textbf{\arabic*.}, leftmargin=*, itemsep=2pt, topsep=2pt]
+  \item Với $a>1$, $k\in\Ns$: $\ \displaystyle\limn\frac{n^k}{a^n}=0$ \quad (tức $\dfrac{a^n}{n^k}\to+\infty$).
+  \item Với mọi $a\in\RR$: $\ \displaystyle\limn\frac{a^n}{n!}=0$.
+\end{enumerate}
+\end{tc}
+
+\textbf{Chứng minh ý 1:} đặt $a=1+h$, $h>0$. Với $n\ge2k$ thì mỗi thừa số của $n(n-1)\cdots(n-k)$ đều $\ge n-k\ge\frac n2$, nên
+\[ a^n\ge C_n^{k+1}h^{k+1}=\frac{n(n-1)\cdots(n-k)}{(k+1)!}h^{k+1}\ge\frac{(n/2)^{k+1}}{(k+1)!}h^{k+1}. \]
+Suy ra $0<\dfrac{n^k}{a^n}\le\dfrac{2^{k+1}(k+1)!}{h^{k+1}}\cdot\dfrac1n\to0$.\\
+\textbf{Chứng minh ý 2:} đặt $n_0=\EE(|a|)+1$ (nên $|a|<n_0$). Với $n>n_0$:
+\[ \frac{|a|^n}{n!}=\frac{|a|^{n_0}}{n_0!}\cdot\frac{|a|}{n_0+1}\cdots\frac{|a|}{n}\le\frac{|a|^{n_0}}{n_0!}\,q^{\,n-n_0},\qquad q=\frac{|a|}{n_0+1}<1, \]
+mà $q^{n-n_0}\to0$ (D1) nên $\frac{a^n}{n!}\to0$.
+
+\begin{hy}[HIỂU Ý: ``bảng xếp hạng tốc độ'' khi $n\to\infty$]
+\[ \ln n\ \ll\ n^k\ \ll\ a^n\ (a>1)\ \ll\ n!\ \ll\ n^n. \]
+Dấu $\ll$ nghĩa là: cái bên phải lớn nhanh hơn \emph{rất nhiều}, nên khi chia thì thương $\to0$. Cứ gặp phân thức của các loại này, hãy đối chiếu bảng rồi quyết định ``ai thắng''.
+\end{hy}
+
+\begin{center}
+\renewcommand{\arraystretch}{1.5}
+\begin{tabularx}{\textwidth}{@{}>{\bfseries\color{maincolor}}l L L@{}}
+  \rowcolor{maincolor!15}\textbf{Dạng} & \textbf{Hướng xử lý} & \textbf{Ví dụ}\\
+  Phân thức đa thức & chia cho lũy thừa cao nhất của $n$ & $\frac{3n^2+n}{2n^2-5}\to\frac32$\\
+  Có hiệu hai căn & nhân liên hợp & $\sqrt{n+1}-\sqrt n\to0$\\
+  Có $\sin,\cos$ trong tử & kẹp hoặc ``VCB $\times$ bị chặn'' & $\frac{\sin n}n\to0$\\
+  Tổng $n$ số hạng cùng dạng & kẹp bằng số hạng bé nhất/lớn nhất & ví dụ ở C4\\
+  Có $a^n$, $n^k$, $n!$ & dùng bảng D3, chia cho thành phần lớn nhất & $\frac{2^n+3^n}{3^{n+1}}\to\frac13$\\
+  Căn bậc $n$ của tổng & kẹp giữa $\sqrt[n]{\text{số lớn nhất}}$ và $\sqrt[n]{(\text{số lượng})\cdot\text{số lớn nhất}}$ & $\sqrt[n]{2^n+3^n}\to3$\\
+\end{tabularx}
+\end{center}
+
+\begin{ts}
+\begin{enumerate}[label=\bt{D\arabic*.}, leftmargin=*, itemsep=4pt]
+  \item Tính $\displaystyle\limn\frac{n^2}{2^n}$.
+  \item Chứng minh $0<\dfrac{n!}{n^n}\le\dfrac1n$, từ đó tính $\displaystyle\limn\frac{n!}{n^n}$.
+  \item Tính $\displaystyle\limn\frac{3^n}{n!}$ \ và \ $\displaystyle\limn\frac{n!}{3^n}$.
+  \item Tính $\displaystyle\limn(n+1)^{1/n}$. \textit{(Gợi ý: kẹp giữa $n^{1/n}$ và $(2n)^{1/n}$.)}
+  \item Tính $\displaystyle\limn\sqrt[n]{2^n+3^n}$.
+\end{enumerate}
+\end{ts}
+\newpage
+% ---------------- PHẦN E ----------------
+\phan{DÃY ĐƠN ĐIỆU, DÃY KỀ NHAU, SỐ $e$ \ \tagkho}
+\vspace{0.2cm}
+\begin{hy}[HIỂU Ý: khi nào biết dãy hội tụ mà \emph{chưa cần biết giới hạn}?]
+Có những dãy ta khó đoán giới hạn bằng $\eps$--$n_0$, nhưng ta biết nó ``chỉ tăng và không vượt qua một cái trần''. Khi đó dãy buộc phải hội tụ (như người leo thang chỉ đi lên mà phía trên có trần: cuối cùng phải dừng sát trần). Đây là công cụ dùng để \emph{định nghĩa số $e$} và nhiều giới hạn khác.
+\end{hy}
+\vspace{0.2cm}
+\muc{E1}{Dãy đơn điệu \tagnho}
+\vspace{0.2cm}
+\begin{dn}{Dãy đơn điệu}
+\begin{itemize}[leftmargin=*, itemsep=2pt, topsep=2pt]
+  \item $(u_n)$ \textbf{tăng} nếu $\forall n:\ u_n\le u_{n+1}$; \textbf{tăng ngặt} nếu $u_n<u_{n+1}$.
+  \item $(u_n)$ \textbf{giảm} nếu $\forall n:\ u_n\ge u_{n+1}$; \textbf{giảm ngặt} nếu $u_n>u_{n+1}$.
+  \item $(u_n)$ \textbf{đơn điệu} nếu nó tăng hoặc giảm.
+\end{itemize}
+\end{dn}
+\vspace{0.2cm}
+\begin{tc}{Định lí 1.2 và 1.3}
+\begin{enumerate}[label=\textbf{\arabic*.}, leftmargin=*, itemsep=2pt, topsep=2pt]
+  \item Dãy \textbf{tăng và bị chặn trên} thì \textbf{hội tụ}, và $\limn u_n=\sup_n u_n$.
+  \item Dãy \textbf{giảm và bị chặn dưới} thì \textbf{hội tụ}, và $\limn u_n=\inf_n u_n$.
+  \item Dãy tăng và \emph{không} bị chặn trên thì $u_n\to+\infty$. Dãy giảm và không bị chặn dưới thì $u_n\to-\infty$.
+\end{enumerate}
+Hệ quả: dãy tăng thì \emph{hoặc hội tụ, hoặc $\to+\infty$} (không có khả năng thứ ba, không ``dao động'').
+\end{tc}
+\vspace{0.2cm}
+\textbf{Chứng minh ý 1:} tập $\{u_n\}$ bị chặn trên nên có cận trên đúng $l=\sup u_n$ (tính chất đầy đủ của $\RR$ ở Bài 1). Với $\eps>0$, $l-\eps$ không phải cận trên nên có $n_0$ với $u_{n_0}>l-\eps$. Vì dãy tăng, $\forall n\ge n_0:\ l-\eps<u_{n_0}\le u_n\le l$, tức $|u_n-l|<\eps$.
+\vspace{0.2cm}
+\begin{ly}
+\begin{itemize}[leftmargin=*, itemsep=2pt, topsep=2pt]
+  \item Nếu $(u_n)$ \textbf{tăng} và $u_n\to a$ thì $u_n\le a$ với mọi $n$ (dãy ``không vượt qua giới hạn''). Và dãy tăng luôn bị chặn dưới bởi $u_0$.
+  \item \textbf{Cách chứng minh một dãy đơn điệu:} xét hiệu $u_{n+1}-u_n$; hoặc xét thương $\frac{u_{n+1}}{u_n}$ (khi $u_n>0$) so với $1$; hoặc dùng quy nạp.
+\end{itemize}
+\end{ly}
+\newpage
+\begin{vd}{Dãy tăng và bị chặn trên}
+Chứng minh $u_n=\displaystyle\sum_{k=1}^n\frac1{n+k}=\frac1{n+1}+\dots+\frac1{2n}$ hội tụ.\\
+\textbf{Tăng:} $u_{n+1}-u_n=\dfrac1{2n+1}+\dfrac1{2n+2}-\dfrac1{n+1}=\dfrac1{2n+1}-\dfrac1{2n+2}=\dfrac1{(2n+1)(2n+2)}>0$.\\
+\textbf{Bị chặn trên:} mỗi số hạng $\le\frac1{n+1}$ và có $n$ số hạng nên $u_n\le\frac n{n+1}<1$.\\
+Vậy $(u_n)$ tăng và bị chặn trên nên hội tụ. (Chưa biết giới hạn là bao nhiêu, nhưng biết \emph{có} giới hạn; giá trị thật là $\ln2$, sẽ học sau.)
+\end{vd}
+\vspace{0.2cm}
+\begin{vd}{Dãy cho bởi công thức truy hồi (rất hay gặp)}
+Cho $x_1=5$, $x_{n+1}=\dfrac12\Big(x_n+\dfrac5{x_n}\Big)$. Tìm $\limn x_n$.\\
+\textbf{Bước 1 (dương):} $x_1>0$; nếu $x_n>0$ thì $x_{n+1}>0$ (tổng hai số dương). Vậy $x_n>0$ với mọi $n$.\\
+\textbf{Bước 2 (bị chặn dưới bởi $\sqrt5$):} theo bất đẳng thức Cô-si, $x_{n+1}=\frac12\big(x_n+\frac5{x_n}\big)\ge\sqrt{x_n\cdot\frac5{x_n}}=\sqrt5$ (với mọi $n\ge1$). Cũng có $x_1=5\ge\sqrt5$.\\
+\textbf{Bước 3 (giảm):} $x_{n+1}-x_n=\dfrac{5-x_n^2}{2x_n}\le0$ vì $x_n\ge\sqrt5$.\\
+\textbf{Bước 4 (qua giới hạn):} $(x_n)$ giảm và bị chặn dưới nên hội tụ về $a\ge\sqrt5>0$ (C4, ý 2). Cho $n\to\infty$ trong công thức truy hồi: $a=\frac12\big(a+\frac5a\big)\Rightarrow a^2=5\Rightarrow a=\sqrt5$.\\
+\textbf{Khuôn mẫu cần nhớ:} (dương/kiểm tra bị chặn) $\to$ (đơn điệu) $\to$ (hội tụ) $\to$ (giải phương trình cho giới hạn). \emph{Luôn kiểm tra giới hạn nhận được có thỏa các điều kiện chặn không} (ở đây loại $a=-\sqrt5$ vì $a>0$). Đây chính là phương pháp Newton để tính $\sqrt5$.
+\end{vd}
+\vspace{0.2cm}
+\begin{vd}{Định lí Stolz dạng đơn giản \tagkho\ (đọc thêm)}
+Cho $u_n\to0$, $v_n\to0$, $(v_n)$ giảm ngặt và $\dfrac{u_{n+1}-u_n}{v_{n+1}-v_n}\to l$. Khi đó $\dfrac{u_n}{v_n}\to l$.\\
+\emph{Ý chứng minh:} vì $v_n$ giảm ngặt về $0$ nên $v_n>0$ và $v_{n+1}-v_n<0$. Cho $\eps>0$, với $n\ge n_0$ có $\big|u_{n+1}-u_n-l(v_{n+1}-v_n)\big|<\eps(v_n-v_{n+1})$. Cộng các bất đẳng thức từ $n$ đến $p-1$ (``telescoping''):
+\[ \big|u_p-u_n-l(v_p-v_n)\big|\le\eps(v_n-v_p). \]
+Cho $p\to\infty$ (khi $u_p,v_p\to0$): $|{-u_n}+lv_n|\le\eps v_n$, tức $\big|\frac{u_n}{v_n}-l\big|\le\eps$ với mọi $n\ge n_0$. \qquad$\blacksquare$
+\end{vd}
+\newpage
+\muc{E2}{Dãy kề nhau, đoạn lồng nhau \tagnho}
+
+\begin{dn}{Hai dãy kề nhau}
+Hai dãy $(u_n),(v_n)$ gọi là \textbf{kề nhau} nếu $(u_n)$ \textbf{tăng}, $(v_n)$ \textbf{giảm} và $\limn(v_n-u_n)=0$.
+\end{dn}
+
+\begin{tc}{Định lí 1.4}
+Hai dãy kề nhau thì \textbf{cùng hội tụ về một giới hạn $l$}, và
+\[ u_n\le l\le v_n\qquad\forall n \]
+(tức $u_0\le u_1\le\dots\le l\le\dots\le v_1\le v_0$).
+\end{tc}
+
+\begin{center}
+\begin{tikzpicture}[font=\small]
+  \draw[->, gray] (-0.3,0) -- (10.4,0);
+  \foreach \x/\n in {0.8/0,2.6/1,3.9/2,4.7/3} {\fill[maincolor] (\x,0) circle (2.4pt); \node[below, maincolor] at (\x,-0.1) {$u_\n$};}
+  \fill[maincolor] (5.2,0) circle (2.4pt);
+  \foreach \x/\n in {9.2/0,7.6/1,6.7/2,6.1/3} {\fill[infocolor] (\x,0) circle (2.4pt); \node[above, infocolor] at (\x,0.1) {$v_\n$};}
+  \fill[infocolor] (5.6,0) circle (2.4pt);
+  \fill[anscolor] (5.4,0) circle (2.8pt); \node[anscolor, above] at (5.4,0.1) {$l$};
+\end{tikzpicture}\\[2pt]
+{\small\itshape $(u_n)$ tiến từ trái, $(v_n)$ tiến từ phải, khoảng giữa thu hẹp dần về đúng một điểm $l$.}
+\end{center}
+
+\textbf{Chứng minh:} đặt $w_n=v_n-u_n$. Có $w_{n+1}-w_n=(v_{n+1}-v_n)-(u_{n+1}-u_n)\le0$ nên $(w_n)$ giảm và $w_n\to0$, suy ra $w_n\ge0$, tức $u_n\le v_n$. Do đó $(u_n)$ tăng, bị chặn trên bởi $v_0$; $(v_n)$ giảm, bị chặn dưới bởi $u_0$. Cả hai hội tụ (E1), lần lượt về $l_1,l_2$ với $l_2-l_1=\lim w_n=0$. Vì $(u_n)$ tăng nên $u_n\le l$, vì $(v_n)$ giảm nên $v_n\ge l$.
+
+\begin{tc}{Hệ quả: định lí đoạn lồng nhau}
+Nếu $[a_{n+1},b_{n+1}]\subset[a_n,b_n]$ với mọi $n$ và $b_n-a_n\to0$ thì tồn tại \textbf{duy nhất} một số $l$ thuộc \emph{mọi} đoạn $[a_n,b_n]$.
+\end{tc}
+(Vì $(a_n)$ tăng, $(b_n)$ giảm, và $b_n-a_n\to0$ nên chúng kề nhau.)
+\vspace{0.2cm}
+\muc{E3}{Số $e$ \tagmoi\ \tagkho}
+\vspace{0.2cm}
+\begin{tc}{Dãy $e_n=\big(1+\frac1n\big)^n$ hội tụ}
+Dãy $e_n=\Big(1+\dfrac1n\Big)^n$ ($n\ge1$) \textbf{tăng và bị chặn trên bởi $3$}, nên hội tụ. Giới hạn đó ký hiệu là $e$:
+\[ \boxed{\ e=\limn\Big(1+\frac1n\Big)^n\ },\qquad e\approx2{,}71828\dots \]
+\end{tc}
+\vspace{0.2cm}
+\textbf{Chứng minh.} Khai triển Newton:
+\[ e_n=\sum_{k=0}^nC_n^k\frac1{n^k}=\sum_{k=0}^n\frac1{k!}\Big(1-\frac1n\Big)\Big(1-\frac2n\Big)\cdots\Big(1-\frac{k-1}n\Big). \]
+\begin{itemize}[leftmargin=*, itemsep=3pt, topsep=2pt]
+  \item \textbf{Tăng:} từ $e_n$ sang $e_{n+1}$, mỗi thừa số $\big(1-\frac jn\big)$ tăng thành $\big(1-\frac j{n+1}\big)$ (lớn hơn), và có thêm một số hạng dương. Vậy $e_{n+1}>e_n$.
+  \item \textbf{Bị chặn trên:} mỗi thừa số $\big(1-\frac jn\big)<1$ và $k!\ge2^{k-1}$, nên $e_n<\sum_{k=0}^n\frac1{k!}<1+1+\frac12+\frac1{2^2}+\dots+\frac1{2^{n-1}}<3$.\\ Dãy tăng và bị chặn trên nên hội tụ.
+\end{itemize}
+
+\vspace{0.2cm}
+\begin{tc}{Một công thức khác cho $e$}
+Dãy $e_n'=\displaystyle\sum_{k=0}^n\frac1{k!}=1+1+\frac1{2!}+\dots+\frac1{n!}$ cũng hội tụ về $e$.
+\end{tc}
+
+\textbf{Chứng minh:} từ khai triển trên, $e_n\le e_n'$, nên $e\le\lim e_n'$. Ngược lại, cố định $k$ và cho $n>k$: $e_n\ge\sum_{j=0}^k\frac1{j!}\prod_{i<j}\big(1-\frac in\big)$; cho $n\to\infty$ được $e\ge e_k'$. Vậy $e_k'\le e\le\lim e_n'$ với mọi $k$, nên $\lim e_k'=e$.
+
+\begin{vd}{$e$ là số vô tỉ \tagkho\ (đọc thêm)}
+Đặt $v_n=e_n'+\dfrac1{n\cdot n!}$. Ta có $v_{n+1}-v_n=\dfrac1{(n+1)!}\Big(1+\dfrac1{n+1}-\dfrac{n+1}n\Big)=\dfrac1{(n+1)!}\Big(\dfrac1{n+1}-\dfrac1n\Big)<0$, nên $(v_n)$ giảm và cùng hội tụ về $e$ với $(e_n')$. Vì $(e_n')$ tăng ngặt, $(v_n)$ giảm ngặt nên \[ e_q'<e<e_q'+\frac1{q\cdot q!}\qquad\forall q\in\Ns. \]
+Giả sử $e=\frac pq$ ($p,q\in\Ns$). Nhân với $q!$: $a=q!\,e_q'$ là số \textbf{nguyên}, và $a<q!\,e=p(q-1)!<a+\frac1q\le a+1$. Số nguyên $p(q-1)!$ nằm \emph{giữa hai số nguyên liên tiếp} $a$ và $a+1$: vô lý. Vậy $e\notin\QQ$.
+\end{vd}
+
+\begin{hy}[HIỂU Ý: số $e$ dùng để làm gì?]
+Số $e$ là cơ số của \textbf{lôgarit tự nhiên} $\ln x$ (lôgarit Nêpe). Nó xuất hiện ở lãi kép liên tục, tăng trưởng/suy giảm theo hàm mũ, và ở $e^{i\theta}=\cos\theta+i\sin\theta$ trong Bài 2. Trong bài tập, hay gặp $(1+\frac1n)^n\to e$ để tính các giới hạn dạng $1^\infty$.
+\end{hy}
+
+\begin{ts}
+\begin{enumerate}[label=\bt{E\arabic*.}, leftmargin=*, itemsep=4pt]
+  \item Cho $x_1=\sqrt2$, $x_{n+1}=\sqrt{2+x_n}$. Chứng minh $(x_n)$ hội tụ và tìm giới hạn. \textit{(Gợi ý: chứng minh $x_n<2$ bằng quy nạp, và $x_{n+1}^2-x_n^2=(2-x_n)(1+x_n)$.)}
+  \item Chứng minh $u_n=1+\dfrac1{2^2}+\dfrac1{3^2}+\dots+\dfrac1{n^2}$ hội tụ. \textit{(Gợi ý: $\frac1{k^2}<\frac1{k(k-1)}=\frac1{k-1}-\frac1k$.)}
+  \item Cho $u_n=\displaystyle\sum_{k=0}^n\frac1{k!}$ và $v_n=u_n+\dfrac1{n\cdot n!}$ ($n\ge1$). Chứng minh hai dãy này kề nhau.
+  \item Tính (dùng $\big(1+\frac1n\big)^n\to e$): a) $\Big(1+\dfrac1n\Big)^{n+1}$ \quad b) $\Big(1+\dfrac1n\Big)^{2n}$ \quad c) $\Big(1-\dfrac1n\Big)^n$.
+\end{enumerate}
+\end{ts}
+
+% ---------------- PHẦN F ----------------
+\phan{DÃY CON VÀ NGUYÊN LÝ CAUCHY \ \tagkho}
+
+\muc{F1}{Dãy con \tagnho}
+
+\begin{dn}{Dãy con}
+Từ $(u_n)$, chọn các chỉ số $n_1<n_2<\dots<n_k<\dots$ rồi lập dãy mới $(u_{n_k})_{k}$. Dãy mới này gọi là một \textbf{dãy con} của $(u_n)$.
+\end{dn}
+
+\begin{center}
+\renewcommand{\arraystretch}{1.5}
+\begin{tabularx}{\textwidth}{@{}L L@{}}
+  \rowcolor{maincolor!15}\textbf{Là dãy con} & \textbf{Không là dãy con}\\
+  $(u_{2n})$ (các số hạng chỉ số chẵn), \quad $(u_{2n+1})$ (chỉ số lẻ), \quad $(u_{n^2})$ & $\big(u_{\lfloor n/2\rfloor}\big)$: $u_0$ xuất hiện hai lần (ứng với $n=0,1$), chỉ số không \emph{tăng ngặt}\\
+\end{tabularx}
+\end{center}
+
+\begin{tc}{Định lí 1.5}
+Nếu $u_n\to a$ thì \textbf{mọi dãy con} của nó cũng $\to a$. (Tương tự, nếu $u_n\to\pm\infty$ thì mọi dãy con cũng $\to\pm\infty$.)
+\end{tc}
+\vspace{0.3cm}
+\textbf{Ý chứng minh:} vì $n_k\ge k$ nên $n_k\to\infty$. Từ $n_0$ (ứng với $\eps$) trở đi mọi $u_n$ gần $a$, nên với mọi $k$ đủ lớn thì $n_k\ge n_0$ và $u_{n_k}$ gần $a$.
+\vspace{0.3cm}
+\begin{hy}[HIỂU Ý: dùng định lí này ``ngược'' để chứng minh phân kì]
+Nếu \textbf{hai dãy con hội tụ về hai số khác nhau} thì dãy ban đầu \textbf{phân kì}. Ví dụ $u_n=(-1)^n$: dãy con chẵn $u_{2n}=1\to1$, dãy con lẻ $u_{2n+1}=-1\to-1$, nên phân kì. Đây là công cụ nhanh nhất để \emph{chứng minh một dãy không có giới hạn}.
+\end{hy}
+\vspace{0.3cm}
+\begin{tc}{Hệ quả (điều kiện cần và đủ)}
+$u_n\to l\iff$ cả hai dãy con $(u_{2n})$ và $(u_{2n+1})$ cùng hội tụ về $l$.
+\end{tc}
+\textbf{Ý chứng minh chiều ``$\Leftarrow$'':} cho $\eps>0$. Có $n_1$ để $|u_{2p}-l|<\eps$ ($p\ge n_1$) và $n_2$ để $|u_{2p+1}-l|<\eps$ ($p\ge n_2$). Lấy $n_0=\max(2n_1,2n_2+1)$: mọi $n\ge n_0$ là chẵn $2p$ hoặc lẻ $2p+1$ với $p$ đủ lớn, nên $|u_n-l|<\eps$.
+\vspace{0.3cm}
+\begin{ly}
+Phải kiểm tra \textbf{cả hai} dãy con chẵn và lẻ (và cùng một giới hạn). Chỉ biết $(u_{2n})$ hội tụ thì \textbf{chưa} suy ra $(u_n)$ hội tụ.
+\end{ly}
+\vspace{0.3cm}
+\begin{vd}{Dãy tuần hoàn mà hội tụ thì là dãy hằng}
+Giả sử $(u_n)$ tuần hoàn chu kỳ $T$ (tức $u_{n+T}=u_n$) và hội tụ về $l$. Cố định $n_0$. Dãy con $u_{n_0+kT}$ ($k=0,1,\dots$) \emph{không đổi}, luôn bằng $u_{n_0}$, nên hội tụ về $u_{n_0}$. Theo Định lí 1.5 nó cũng hội tụ về $l$, vậy $l=u_{n_0}$. Vì $n_0$ tùy ý nên $u_n=l$ với mọi $n$: dãy hằng.
+\end{vd}
+\vspace{0.3cm}
+\begin{vd}{Dùng hệ quả dãy con chẵn--lẻ \tagkho}
+Cho $(u_n)$ thỏa $0\le u_{m+n}\le\dfrac{m+n}{mn}$ với mọi $m,n\in\Ns$. Chứng minh $u_n\to0$.\\
+Lấy $m=n$: $0\le u_{2n}\le\dfrac{2n}{n^2}=\dfrac2n\to0$. Lấy $m=n$ và $n+1$: $0\le u_{2n+1}\le\dfrac{2n+1}{n(n+1)}\to0$. Theo kẹp, $u_{2n}\to0$ và $u_{2n+1}\to0$; theo hệ quả, $u_n\to0$.
+\end{vd}
+
+
+\muc{F2}{Định lí Bolzano--Weierstrass \tagmoi\ \tagkho}
+
+\begin{tc}{Định lí 1.6 (Bolzano--Weierstrass)}
+Từ mọi dãy \textbf{bị chặn} đều có thể trích ra một \textbf{dãy con hội tụ}.
+\end{tc}
+\vspace{0.3cm}
+\textbf{Ý chứng minh (phương pháp chia đôi):} vì $(u_n)$ bị chặn nên mọi số hạng nằm trong một đoạn $[a_0,b_0]$. Chia đôi đoạn đó; ít nhất một nửa chứa \emph{vô hạn} số hạng của dãy, gọi là $[a_1,b_1]$. Lặp lại: được các đoạn lồng nhau $[a_n,b_n]$ với $b_n-a_n=\frac{b_0-a_0}{2^n}\to0$. Mỗi đoạn lại chọn một số hạng $u_{n_k}\in[a_k,b_k]$ với $n_k$ tăng ngặt. Theo đoạn lồng nhau (E2) có $l$ thuộc mọi đoạn, và $|u_{n_k}-l|\le b_k-a_k\to0$.
+\vspace{0.3cm}
+\begin{hy}[HIỂU Ý: định lí này nói gì?]
+Dãy bị chặn có thể dao động lung tung, nhưng \textbf{luôn có ``chỗ dồn''}: một dãy con tiến về một điểm. Ví dụ $(-1)^n$ dao động mãi nhưng có dãy con $u_{2n}\to1$. Định lí này sẽ dùng ở Chương sau (hàm liên tục trên đoạn đạt max, min).
+\end{hy}
+\vspace{0.5cm}
+\muc{F3}{Nguyên lý Cauchy \tagmoi}
+
+\begin{tc}{Định lí 1.7 (nguyên lý Cauchy)}
+$(u_n)$ hội tụ $\iff$
+\[ (\forall\eps>0)\ (\exists n_0)\ (\forall n\ge n_0)\ (\forall m\ge n_0)\ :\ |u_n-u_m|<\eps. \]
+(Dãy thỏa điều kiện này gọi là \textbf{dãy Cauchy}.)
+\end{tc}
+\vspace{0.3cm}
+\begin{hy}[HIỂU Ý: điểm mạnh của Cauchy]
+Định nghĩa hội tụ cần biết trước \textbf{giới hạn $a$}. Điều kiện Cauchy chỉ nói: \emph{các số hạng ở xa dần nhau ``sát lại gần nhau''}, \textbf{không cần biết giới hạn}. Vì vậy nó rất tiện để chứng minh hội tụ hoặc phân kì khi chưa đoán được giới hạn. Phát biểu này (``dãy Cauchy thì hội tụ'') chính là cách nói khác của tính đầy đủ của $\RR$ (Bài 1). Ở đây giáo trình chỉ phát biểu, không chứng minh.
+\end{hy}
+\vspace{0.3cm}
+\begin{vd}{Dãy điều hòa $H_n=1+\frac12+\dots+\frac1n$ phân kì}
+Ta có $H_{2n}-H_n=\dfrac1{n+1}+\dots+\dfrac1{2n}\ge n\cdot\dfrac1{2n}=\dfrac12$ với \emph{mọi} $n$. Lấy $\eps=\frac12$: với mọi $n_0$, chọn $n=n_0$ và $m=2n_0$ thì $|H_m-H_n|\ge\frac12$, vi phạm điều kiện Cauchy. Vậy $(H_n)$ không hội tụ. Vì $(H_n)$ tăng nên $H_n\to+\infty$.\\
+\textbf{Lưu ý quan trọng:} $\frac1n\to0$ nhưng tổng $\sum\frac1n$ vẫn $\to+\infty$. ``Số hạng tiến về $0$'' \textbf{chưa đủ} để tổng hội tụ (sẽ gặp lại ở chương chuỗi).
+\end{vd}
+
+\begin{ts}
+\begin{enumerate}[label=\bt{F\arabic*.}, leftmargin=*, itemsep=4pt]
+  \item Chứng minh $u_n=\sin\dfrac{n\pi}2$ phân kì (chỉ ra hai dãy con có giới hạn khác nhau).
+  \item Cho $u_n=(-1)^n+\dfrac1n$. Tìm các dãy con $(u_{2n})$, $(u_{2n+1})$, kết luận về $(u_n)$.
+  \item Chứng minh $u_n=\dfrac{(-1)^nn}{n+1}$ bị chặn nhưng phân kì. Chỉ ra một dãy con hội tụ (như Bolzano--Weierstrass đảm bảo).
+  \item (\emph{Nối với Bài 2}) Xét $z_n=\dfrac{(1+i)^n}{2^n}$ và $w_n=i^n$. Dãy nào hội tụ, dãy nào phân kì? Tìm giới hạn nếu có.
+\end{enumerate}
+\end{ts}
+
+\vspace{0.5cm}
+\begin{tcolorbox}[enhanced, breakable, colback=lightmain, colframe=maincolor, arc=4pt, boxrule=0.9pt, title={\bfseries\small GẶP DÃY SỐ, NÊN DÙNG CÔNG CỤ NÀO?}, coltitle=white, left=9pt, right=9pt]
+\renewcommand{\arraystretch}{1.45}
+\begin{tabularx}{\textwidth}{@{}>{\bfseries\color{maincolor}}L L@{}}
+  \textbf{Tình huống} & \textbf{Công cụ}\\
+  Dãy là biểu thức của $n$, dạng quen & Tính chất đại số (C3), chia cho lũy thừa cao nhất, nhân liên hợp, bảng D\\
+  Có $\sin n,\cos n$ hoặc tổng nhiều số hạng & Nguyên lý kẹp (C4), ``vô cùng bé $\times$ bị chặn''\\
+  Công thức truy hồi $u_{n+1}=f(u_n)$ & Quy nạp chứng minh chặn $\to$ chứng minh đơn điệu $\to$ hội tụ $\to$ giải phương trình giới hạn (E1)\\
+  Hai dãy ``kẹp'' từ hai phía & Dãy kề nhau, đoạn lồng nhau (E2)\\
+  Không đoán được giới hạn nhưng muốn biết có hội tụ & Đơn điệu + bị chặn (E1), hoặc nguyên lý Cauchy (F3)\\
+  Chứng minh \textbf{phân kì} & Không bị chặn (C2), hoặc hai dãy con có giới hạn khác nhau (F1), hoặc vi phạm điều kiện Cauchy (F3)\\
+  Chứng minh bằng chính định nghĩa & ``Nháp ngược'' $\eps$--$n_0$ (A4)\\
+\end{tabularx}
+\end{tcolorbox}
+\newpage
+\vspace{0.3cm}
+\begin{tcolorbox}[enhanced, breakable, colback=lightmain, colframe=maincolor, arc=5pt, boxrule=1.2pt,
+  coltitle=white, fonttitle=\bfseries, title={TRANG GHI NHỚ BÀI 3 \enspace (chép 1 mặt vào vở)}, left=10pt, right=10pt]
+\begin{itemize}[leftmargin=*, itemsep=3pt, topsep=2pt]
+  \item $u_n\to a\iff(\forall\eps>0)(\exists n_0)(\forall n\ge n_0)\,|u_n-a|<\eps$. $n_0$ phụ thuộc $\eps$. $u_n\to+\infty\iff(\forall A)(\exists n_0)(\forall n\ge n_0)\,u_n>A$. Phân kì = không hội tụ (kể cả $\to\pm\infty$).
+  \item Chứng minh bằng định nghĩa: tính $|u_n-a|$, rồi \emph{phóng đại} và giải $<\eps$ để tìm $n_0$.
+  \item Hội tụ $\Rightarrow$ giới hạn duy nhất, dãy bị chặn. (Ngược lại \textbf{sai}: $(-1)^n$.) Không bị chặn $\Rightarrow$ phân kì.
+  \item Đại số: $+,-,\times,\div$ (mẫu $\ne0$). VCB $\times$ bị chặn $=$ VCB. Dạng vô định phải biến đổi trước.
+  \item Thứ tự: $u_n\le v_n\Rightarrow\lim u_n\le\lim v_n$ (dấu $<$ mất tính ngặt). \textbf{Kẹp:} $u_n\le v_n\le w_n$, $u_n,w_n\to a\Rightarrow v_n\to a$.
+  \item $a^n\to0\ (|a|<1)$; $\ \to+\infty\ (a>1)$; $\ a^{1/n}\to1$; $\ n^{1/n}\to1$; $\ \dfrac{n^k}{a^n}\to0\ (a>1)$; $\ \dfrac{a^n}{n!}\to0$. Thứ tự tăng: $\ln n\ll n^k\ll a^n\ll n!\ll n^n$.
+  \item \textbf{Tăng và bị chặn trên $\Rightarrow$ hội tụ} (về $\sup$). Giảm và bị chặn dưới $\Rightarrow$ hội tụ (về $\inf$). Tăng không chặn trên $\Rightarrow+\infty$.
+  \item \textbf{Kề nhau:} $(u_n)\uparrow$, $(v_n)\downarrow$, $v_n-u_n\to0\Rightarrow$ cùng hội tụ về $l$, $u_n\le l\le v_n$. Đoạn lồng nhau co về $0$ $\Rightarrow$ có đúng một điểm chung.
+  \item $e=\limn\big(1+\frac1n\big)^n=\limn\sum_{k=0}^n\frac1{k!}\approx2{,}71828$; $e\notin\QQ$.
+  \item \textbf{Dãy con:} $u_n\to a\Rightarrow$ mọi dãy con $\to a$. Hai dãy con có giới hạn khác nhau $\Rightarrow$ phân kì. $u_n\to l\iff u_{2n},u_{2n+1}\to l$.
+  \item \textbf{Bolzano--Weierstrass:} dãy bị chặn có dãy con hội tụ. \textbf{Cauchy:} hội tụ $\iff(\forall\eps)(\exists n_0)(\forall n,m\ge n_0)\,|u_n-u_m|<\eps$.
+  \item Dãy phức $z_n=x_n+iy_n\to a+ib\iff x_n\to a$ và $y_n\to b$.
+\end{itemize}
+\end{tcolorbox}
+
+% ########################################################
+% ########################################################
+%                    TỔNG HỢP CHƯƠNG 1
+% ########################################################
+% ########################################################
+\bai{TỔNG HỢP CHƯƠNG 1: GIỚI HẠN CỦA DÃY SỐ}{TỔNG HỢP CHƯƠNG 1\\[4pt] GIỚI HẠN CỦA DÃY SỐ}{Tài liệu tự học, tự soạn, tổng hợp từ giáo trình và các nguồn khác}
+
+\begin{hy}[CHƯƠNG NÀY NÓI VỀ CÁI GÌ? (đọc 30 giây)]
+Chương 1 là nền của cả môn Giải tích. Có ba ý chính:
+\begin{enumerate}[label=\textbf{(\arabic*)}, leftmargin=*, itemsep=1pt, topsep=2pt]
+  \item \textbf{Số thực $\RR$ là ``đầy''} (không có ``lỗ'' như $\QQ$): mọi tập khác rỗng bị chặn trên đều có $\sup$. Đây là tính chất sâu nhất, mọi định lý về giới hạn đều dựa vào nó.
+  \item \textbf{Số phức $\CC$}: mở rộng $\RR$ để $x^2+1=0$ có nghiệm; công cụ mạnh cho lượng giác (Moivre, Euler).
+  \item \textbf{Giới hạn dãy số} $u_n\to l$: ``$n$ đủ lớn thì $u_n$ gần $l$ tuỳ ý'', viết bằng $|u_n-l|<\eps$. Đây là khái niệm khó nhất chương; đạo hàm, tích phân sau này đều xuất phát từ nó.
+\end{enumerate}
+Phần C, F, G là chỗ cần đọc chậm nhất.
+\end{hy}
+
+\begin{center}
+\renewcommand{\arraystretch}{1.5}
+\renewcommand{\tabularxcolumn}[1]{m{#1}}
+\begin{tabularx}{\textwidth}{@{}>{\centering\arraybackslash\bfseries\color{maincolor}}m{1.5cm} L >{\centering\arraybackslash}m{2.6cm}@{}}
+  \rowcolor{maincolor!15}\textbf{Phần} & \textbf{Nội dung} & \textbf{Mức độ}\\
+  A & Số thực: $\sup,\inf$, tính đầy, trù mật, giá trị tuyệt đối & \tagde\ \tagmoi\\
+  B & Số phức: các dạng, Moivre, căn bậc $n$, Euler, ứng dụng lượng giác & \tagmoi\\
+  C & \textbf{Định nghĩa giới hạn dãy số} ($\eps$--$n_0$), phân kỳ, bị chặn & \tagmoi\ \tagkho\\
+  D & Tính chất: duy nhất, bị chặn, phép toán, thứ tự, nguyên lý kẹp & \tagnho\\
+  E & Giới hạn cơ bản và kỹ thuật tính (bảng ``gặp bài\dots nên làm gì'') & \tagnho\\
+  F & \textbf{Dãy đơn điệu}, số $e$ & \tagmoi\ \tagkho\\
+  G & Dãy kề nhau, \textbf{dãy con}, Bolzano--Weierstrass, \textbf{Cauchy} & \tagmoi\ \tagkho\\
+\end{tabularx}
+\end{center}
+\newpage
+
+% ---------------- PHẦN A ----------------
+\phan{SỐ THỰC}
+
+\muc{A1}{Từ $\QQ$ đến $\RR$ \tagde}
+
+\begin{dn}{Các tập số}
+$\NN=\{0,1,2,\dots\}$, $\Ns=\NN\setminus\{0\}$, $\ZZ=\{0,\pm1,\pm2,\dots\}$, $\QQ=\big\{\tfrac pq:\ p\in\ZZ,\ q\in\Ns\big\}$.
+\begin{itemize}[leftmargin=*, itemsep=2pt, topsep=2pt]
+  \item Số hữu tỉ $=$ số thập phân \textbf{hữu hạn} hoặc \textbf{vô hạn tuần hoàn}.
+  \item Số \textbf{vô tỉ} $=$ số thập phân vô hạn \textbf{không} tuần hoàn.
+  \item $\RR=\QQ\cup(\RR\setminus\QQ)$ là tập các số thực.
+\end{itemize}
+\end{dn}
+
+\begin{hy}[VÌ SAO CẦN $\RR$?]
+$\QQ$ có ``lỗ'': đường chéo hình vuông cạnh $1$ dài $\sqrt2$, nhưng không có số hữu tỉ nào có bình phương bằng $2$. Số $\pi$, $e$ cũng không hữu tỉ. $\RR$ là tập ``lấp đầy các lỗ'' đó (nghĩa chính xác ở A2).
+\end{hy}
+
+\begin{vd}{$\sqrt2\notin\QQ$}
+Giả sử $\sqrt2=\frac mn$ với $m,n\in\Ns$ và ước chung lớn nhất bằng $1$. Khi đó $m^2=2n^2$ nên $m$ chẵn, $m=2p$. Suy ra $4p^2=2n^2$, tức $n^2=2p^2$, nên $n$ cũng chẵn. Vậy $m,n$ có ước chung $2$: mâu thuẫn. \hfill$\blacksquare$
+\end{vd}
+
+\muc{A2}{Cận trên, cận dưới, tính đầy \tagmoi\ \tagkho}
+
+\begin{dn}{Cận trên, cận dưới, $\sup$, $\inf$}
+Cho $X\subset\RR$ và $a\in\RR$.
+\begin{itemize}[leftmargin=*, itemsep=2pt, topsep=2pt]
+  \item $a$ là \textbf{cận trên} của $X$ nếu $x\le a$ với mọi $x\in X$; là \textbf{cận dưới} nếu $x\ge a$ với mọi $x\in X$. $X$ \textbf{bị chặn} nếu có cả cận trên và cận dưới.
+  \item Cận trên \textbf{nhỏ nhất} gọi là \textbf{cận trên đúng}, ký hiệu $\sup X$. Cận dưới \textbf{lớn nhất} gọi là \textbf{cận dưới đúng}, ký hiệu $\inf X$.
+  \item Nếu $\sup X\in X$ thì nó là phần tử lớn nhất $\max X$; nếu $\inf X\in X$ thì nó là $\min X$.
+\end{itemize}
+\end{dn}
+
+\begin{ly}
+$\sup X$ \textbf{không nhất thiết thuộc $X$}. Ví dụ $X=(0;1)$: $\sup X=1\notin X$ nên $X$ không có $\max$.
+\end{ly}
+
+\begin{tc}{Tính đầy của $\RR$ \ \tagnho}
+Mọi tập con khác rỗng của $\RR$ \textbf{bị chặn trên} đều có $\sup\in\RR$; mọi tập con khác rỗng \textbf{bị chặn dưới} đều có $\inf\in\RR$.
+\end{tc}
+
+\begin{hy}[ĐÂY LÀ TÍNH CHẤT QUAN TRỌNG NHẤT CỦA $\RR$]
+$\QQ$ \emph{không} đầy: $A=\{x\in\QQ:\ x^2<2\}$ bị chặn trên (bởi $2$) nhưng không có cận trên nhỏ nhất \emph{trong $\QQ$} (cận trên nhỏ nhất đáng lẽ là $\sqrt2\notin\QQ$). Trong $\RR$ thì có. Từ tính đầy ta suy ra: dãy đơn điệu bị chặn thì hội tụ (Phần F), đoạn lồng nhau, Bolzano--Weierstrass (Phần G).
+\end{hy}
+\vspace{0.4cm}
+\begin{tc}{Đặc trưng $\eps$ của $\sup$, $\inf$ \ \tagnho}
+\begin{itemize}[leftmargin=*, itemsep=2pt, topsep=2pt]
+  \item $M=\sup X\iff$ $M$ là cận trên của $X$ và $\forall\eps>0,\ \exists\alpha\in X:\ M-\eps<\alpha\le M$.
+  \item $m=\inf X\iff$ $m$ là cận dưới của $X$ và $\forall\eps>0,\ \exists\alpha\in X:\ m\le\alpha<m+\eps$.
+\end{itemize}
+\end{tc}
+\vspace{0.3cm}
+\taghieu\ \emph{Vì sao?} Nếu $M$ là cận trên mà với một $\eps>0$ nào đó không có phần tử nào của $X$ lớn hơn $M-\eps$, thì $M-\eps$ cũng là cận trên, nhỏ hơn $M$: vậy $M$ không phải cận trên \emph{nhỏ nhất}. Hiểu bằng lời: \textbf{có phần tử của $X$ nằm sát $M$ tuỳ ý}.
+\vspace{0.3cm}
+\begin{tc}{Tính Archimède và tính trù mật của $\QQ$}
+$\NN$ không bị chặn trên trong $\RR$. Nếu $a<b$ thì tồn tại $r\in\QQ$ với $a<r<b$.
+\end{tc}
+\emph{Chứng minh:} Nếu $\NN$ bị chặn trên, đặt $s=\sup\NN$; theo đặc trưng $\eps$ có $n\in\NN$ với $n>s-1$, suy ra $n+1>s$ với $n+1\in\NN$: mâu thuẫn. Với $a<b$, chọn $n\in\Ns$ sao cho $\frac1n<b-a$ rồi đặt $r=\frac{\lfloor na\rfloor+1}n$. Vì $na<\lfloor na\rfloor+1\le na+1$ nên $a<r\le a+\frac1n<b$. \hfill$\blacksquare$
+\vspace{0.4cm}
+\begin{vd}{Tìm $\sup,\inf$ của $X=\{u_n:\ n\ge1\}$, $u_n=\dfrac12+\dfrac{1+(-1)^n}{4n}$}
+$n$ lẻ: $u_n=\frac12$. $n=2p$ chẵn: $u_{2p}=\frac12+\frac1{4p}$, giảm theo $p$ và $u_2=\frac34$. Vậy $\frac12\le u_n\le\frac34$ với mọi $n$, và cả hai giá trị đều đạt được: $\inf X=\min X=\dfrac12$, $\sup X=\max X=\dfrac34$.
+\end{vd}
+\vspace{0.4cm}
+\begin{vd}{Nếu $A,B$ khác rỗng, bị chặn trên thì $\sup(A+B)=\sup A+\sup B$}
+Đặt $\alpha=\sup A$, $\beta=\sup B$ và $A+B=\{a+b:\ a\in A,\ b\in B\}$. Với mọi $a,b$: $a+b\le\alpha+\beta$, nên $\alpha+\beta$ là cận trên của $A+B$. Với $\eps>0$, có $a\in A$, $b\in B$ với $a>\alpha-\frac\eps2$, $b>\beta-\frac\eps2$, suy ra $a+b>\alpha+\beta-\eps$. Theo đặc trưng $\eps$, $\sup(A+B)=\alpha+\beta$. \hfill$\blacksquare$
+\end{vd}
+
+\muc{A3}{Giá trị tuyệt đối và lân cận \tagde}
+
+\begin{dn}{Giá trị tuyệt đối, khoảng cách, lân cận}
+$|x|=x$ nếu $x\ge0$, $|x|=-x$ nếu $x<0$. Khoảng cách giữa hai số: $d(x,y)=|x-y|$. \textbf{Lân cận} của $a$ bán kính $\eps>0$ là khoảng $(a-\eps;a+\eps)=\{x:\ |x-a|<\eps\}$.
+\end{dn}
+
+\begin{tc}{Tính chất của $|\cdot|$ \ \tagnho}
+\begin{enumerate}[label=\textbf{\arabic*.}, leftmargin=*, itemsep=2pt, topsep=2pt]
+  \item $|x|\ge0$; $|x|=0\iff x=0$; $|xy|=|x||y|$; $\big|\frac1x\big|=\frac1{|x|}$.
+  \item $|x+y|\le|x|+|y|$ (bất đẳng thức tam giác), tổng quát $\big|\sum x_i\big|\le\sum|x_i|$.
+  \item $\big||x|-|y|\big|\le|x-y|$.
+  \item $\max(x,y)=\frac12\big(x+y+|x-y|\big)$, $\ \min(x,y)=\frac12\big(x+y-|x-y|\big)$.
+  \item $|x-a|<\eps\iff a-\eps<x<a+\eps$; \ $|x|\ge A>0\iff x\ge A$ hoặc $x\le-A$.
+\end{enumerate}
+\end{tc}
+
+\begin{ly}
+Đừng viết $|x|<\eps\iff x<\eps$: thiếu điều kiện $x>-\eps$. Còn $|x|>\eps$ cho \emph{hai} khoảng rời nhau, không phải một.
+\end{ly}
+
+\begin{ts}
+\begin{enumerate}[label=\bt{A\arabic*.}, leftmargin=*, itemsep=4pt]
+  \item Chứng minh $\sqrt3$ là số vô tỉ.
+  \item Tìm $\sup,\inf,\max,\min$ (nếu có) của $E=\big\{(-1)^n+\frac1n:\ n\in\Ns\big\}$.
+  \item Chứng minh $\sqrt2+\sqrt3$ là số vô tỉ.
+  \item Tìm $\sup,\inf$ của $X=\big\{\frac n{n+1}:\ n\in\Ns\big\}$ và cho biết $\max,\min$ có tồn tại không.
+  \item Giải: a) $|2x-1|\le3$ \quad b) $|x+1|>2$.
+\end{enumerate}
+\end{ts}
+
+% ---------------- PHẦN B ----------------
+\phan{SỐ PHỨC}
+
+\begin{hy}[HIỂU Ý]
+Số phức dùng để (i) giải mọi phương trình bậc hai (và cao hơn), (ii) biến lượng giác thành đại số (công thức Moivre, Euler), (iii) là công cụ lớn trong kỹ thuật điện tử. Ở Chương 1 chỉ cần nắm \textbf{ba dạng viết}, \textbf{Moivre}, \textbf{căn bậc $n$}.
+\end{hy}
+
+\muc{B1}{Định nghĩa và các dạng của số phức \tagmoi}
+
+\begin{dn}{Số phức}
+$\CC=\{z=x+iy:\ x,y\in\RR\}$ với $i^2=-1$ (\emph{đơn vị ảo}, $i\notin\RR$). Với $z=x+iy$:
+\begin{itemize}[leftmargin=*, itemsep=2pt, topsep=2pt]
+  \item $\Re z=x$ (phần thực), $\Im z=y$ (phần ảo); \textbf{liên hợp} $\bar z=x-iy$.
+  \item \textbf{Môđun} $|z|=\sqrt{x^2+y^2}=r\ge0$.
+  \item Với $z\ne0$: \textbf{acgumen} $\Arg z=\theta$ là số thực thoả $\cos\theta=\frac x{|z|}$, $\sin\theta=\frac y{|z|}$.
+\end{itemize}
+Ba dạng viết: $\ z=x+iy$ (chính tắc) $\ =r(\cos\theta+i\sin\theta)$ (lượng giác) $\ =re^{i\theta}$ (Euler, với $e^{i\theta}:=\cos\theta+i\sin\theta$).
+\end{dn}
+
+\begin{ly}
+$\Arg z$ chỉ xác định \textbf{sai khác $2k\pi$}, và $\Arg0$ không xác định. Hai số phức bằng nhau $\iff$ cùng phần thực và cùng phần ảo $\iff$ cùng môđun và acgumen sai khác $2k\pi$. Trong $\CC$ \textbf{không} có quan hệ $<$ (không viết $z_1<z_2$); chỉ so sánh được môđun.
+\end{ly}
+
+\begin{center}
+\begin{tikzpicture}[scale=1.2, font=\small]
+\draw[->] (-0.5,0)--(3.5,0) node[right]{$x$};
+\draw[->] (0,-0.5)--(0,2.8) node[above]{$y$};
+\draw[->,thick,maincolor] (0,0)--(2.5,2) node[above right]{$M(z)$};
+\draw[dashed] (2.5,0) node[below]{$x$}--(2.5,2)--(0,2) node[left]{$y$};
+\draw (0.7,0) arc (0:38.7:0.7); \node at (1.05,0.25) {$\theta$};
+\node at (1.0,1.35) {$r=|z|$};
+\end{tikzpicture}\\[2pt]
+{\small\itshape Biểu diễn $z=x+iy$ bởi điểm $M(x,y)$ trên mặt phẳng phức: $|z|=OM$, $\theta=\Arg z$ là góc từ $Ox$ đến $OM$.}
+\end{center}
+
+\muc{B2}{Các phép toán \tagde}
+
+\begin{center}
+\renewcommand{\arraystretch}{1.6}
+\begin{tabularx}{\textwidth}{@{}>{\bfseries\color{maincolor}}l L L@{}}
+  \rowcolor{maincolor!15}\textbf{Phép} & \textbf{Dạng chính tắc} & \textbf{Dạng lượng giác}\\
+  Cộng, trừ & $(x_1\pm x_2)+i(y_1\pm y_2)$ & (không tiện)\\
+  Nhân & $(x_1x_2-y_1y_2)+i(x_1y_2+x_2y_1)$ & $r_1r_2\big(\cos(\theta_1+\theta_2)+i\sin(\theta_1+\theta_2)\big)$\\
+  Chia ($z_2\ne0$) & $\dfrac{z_1\bar z_2}{|z_2|^2}$ & $\dfrac{r_1}{r_2}\big(\cos(\theta_1-\theta_2)+i\sin(\theta_1-\theta_2)\big)$\\
+  Liên hợp & $x-iy$ & $r\big(\cos(-\theta)+i\sin(-\theta)\big)$\\
+\end{tabularx}
+\end{center}
+
+\begin{tc}{Tính chất \ \tagnho}
+$z\bar z=|z|^2$; \ $\overline{z_1z_2}=\bar z_1\bar z_2$, \ $\overline{z_1\pm z_2}=\bar z_1\pm\bar z_2$; \ $\Re z=\frac{z+\bar z}2$, $\Im z=\frac{z-\bar z}{2i}$; \ $|z_1z_2|=|z_1||z_2|$; \ $|z_1+z_2|\le|z_1|+|z_2|$; \ $\Arg(z_1z_2)=\Arg z_1+\Arg z_2$ (sai khác $2k\pi$).
+\end{tc}
+
+\taghieu\ \textbf{Nhân số phức $=$ nhân môđun, cộng acgumen.} Đó là lý do dạng lượng giác tiện cho phép nhân, chia, luỹ thừa; còn cộng, trừ thì dùng dạng chính tắc.
+
+\muc{B3}{Công thức Moivre \tagnho}
+
+\begin{tc}{Moivre}
+Với $z=r(\cos\varphi+i\sin\varphi)$ và $n\in\Ns$: $\ z^n=r^n(\cos n\varphi+i\sin n\varphi)$.
+\end{tc}
+\emph{Chứng minh} (quy nạp). $n=1$ đúng. Giả sử đúng với $n=k$; theo công thức nhân, $z^{k+1}=z^kz=r^{k+1}\big(\cos(k\varphi+\varphi)+i\sin(k\varphi+\varphi)\big)$. \hfill$\blacksquare$
+
+\begin{vd}{Biểu diễn $\cos3x$, $\sin3x$ theo $\cos x$, $\sin x$}
+Theo Moivre, $\cos3x+i\sin3x=(\cos x+i\sin x)^3=\cos^3x+3i\cos^2x\sin x-3\cos x\sin^2x-i\sin^3x$. So sánh phần thực và phần ảo:
+\[\cos3x=\cos^3x-3\cos x\sin^2x,\qquad \sin3x=3\cos^2x\sin x-\sin^3x.\]
+\end{vd}
+
+\begin{vd}{Tính $(1+i)^{10}$}
+$1+i=\sqrt2\big(\cos\frac\pi4+i\sin\frac\pi4\big)$ nên $(1+i)^{10}=2^5\big(\cos\frac{10\pi}4+i\sin\frac{10\pi}4\big)=32\big(\cos\frac{5\pi}2+i\sin\frac{5\pi}2\big)=32i$.
+\end{vd}
+
+\muc{B4}{Căn bậc $n$ \tagmoi}
+
+\begin{dn}{Căn bậc $n$ của số phức}
+Cho $z=r(\cos\theta+i\sin\theta)\ne0$. Số $\omega$ thoả $\omega^n=z$ gọi là \textbf{căn bậc $n$} của $z$. Đặt $\omega=\rho(\cos\psi+i\sin\psi)$, từ Moivre: $\rho^n=r$ và $n\psi=\theta+2k\pi$. Vậy $z$ có \textbf{đúng $n$} căn bậc $n$:
+\[\omega_k=\sqrt[n]r\Big(\cos\frac{\theta+2k\pi}n+i\sin\frac{\theta+2k\pi}n\Big),\quad k=0,1,\dots,n-1.\]
+\end{dn}
+\vspace{0.3cm}
+\begin{ly}
+Trong $\CC$, căn bậc $n$ có \textbf{$n$ giá trị}, không phải một. Ký hiệu $\sqrt[n]r$ trong công thức chỉ căn số học (dương) của số thực $r>0$.
+\end{ly}
+\vspace{0.3cm}
+\begin{tc}{Căn bậc $n$ của $1$ \ \tagnho}
+$\omega_k=e^{2k\pi i/n}$, $k=0,\dots,n-1$. Chúng là các đỉnh của đa giác đều $n$ cạnh nội tiếp đường tròn đơn vị (một đỉnh là $1$), và với $n\ge2$ thì $\sum_{k=0}^{n-1}\omega_k=0$ (tổng cấp số nhân với công bội $\omega_1\ne1$ và $\omega_1^n=1$).
+\end{tc}
+\vspace{0.3cm}
+\begin{vd}{Căn bậc $3$ của $-1$}
+$-1=\cos\pi+i\sin\pi$ nên $z_k=\cos\frac{\pi+2k\pi}3+i\sin\frac{\pi+2k\pi}3$, $k=0,1,2$:
+\[z_0=\tfrac12+\tfrac{\sqrt3}2i,\qquad z_1=-1,\qquad z_2=\tfrac12-\tfrac{\sqrt3}2i.\]
+\end{vd}
+
+\begin{vd}{Căn bậc $4$ của $-1+i\sqrt3$}
+$-1+i\sqrt3=2\big(\cos\frac{2\pi}3+i\sin\frac{2\pi}3\big)$, nên $z_k=\sqrt[4]2\big(\cos(\frac\pi6+\frac{k\pi}2)+i\sin(\frac\pi6+\frac{k\pi}2)\big)$, $k=0,1,2,3$. Chẳng hạn $z_0=\sqrt[4]2\big(\frac{\sqrt3}2+\frac i2\big)=\dfrac{\sqrt3+i}{\sqrt[4]8}$; ba căn còn lại thu được bằng cách quay thêm $\frac\pi2$ mỗi lần: $z_1=\frac{-1+i\sqrt3}{\sqrt[4]8}$, $z_2=-z_0$, $z_3=-z_1$.
+\end{vd}
+
+\muc{B5}{Ứng dụng vào lượng giác \tagmoi}
+
+\begin{vd}{Tính $C_n=\sum_{k=0}^n\cos(a+kb)$ và $S_n=\sum_{k=0}^n\sin(a+kb)$, $b\notin2\pi\ZZ$}
+Đặt $C_n+iS_n=\sum_{k=0}^ne^{i(a+kb)}=e^{ia}\sum_{k=0}^n(e^{ib})^k$, là tổng cấp số nhân công bội $e^{ib}\ne1$:
+\[C_n+iS_n=e^{ia}\frac{e^{i(n+1)b}-1}{e^{ib}-1}=e^{ia}\,e^{inb/2}\,\frac{\sin\frac{(n+1)b}2}{\sin\frac b2}.\]
+(đã dùng $e^{it}-1=e^{it/2}\cdot2i\sin\frac t2$). Lấy phần thực, phần ảo:
+\[C_n=\cos\Big(a+\frac{nb}2\Big)\frac{\sin\frac{(n+1)b}2}{\sin\frac b2},\qquad S_n=\sin\Big(a+\frac{nb}2\Big)\frac{\sin\frac{(n+1)b}2}{\sin\frac b2}.\]
+Nếu $b\in2\pi\ZZ$ thì mọi số hạng bằng nhau: $C_n=(n+1)\cos a$, $S_n=(n+1)\sin a$.
+\end{vd}
+\vspace{0.5cm}
+\begin{ly}
+Lỗi hay gặp: dùng $\cos n\varphi$ rồi quên $z^n+z^{-n}=2\cos n\varphi$ \textbf{chỉ đúng khi $|z|=1$}. Với $z=e^{i\varphi}$ thì $\frac1z=\bar z$, nên $z^n+\frac1{z^n}=2\cos n\varphi$.
+\end{ly}
+\vspace{0.5cm}
+\begin{ts}
+\begin{enumerate}[label=\bt{B\arabic*.}, leftmargin=*, itemsep=4pt]
+  \item Viết dạng chính tắc: a) $\dfrac{1+i}{2-i}$ \quad b) $(1+i)^{10}$ \quad c) $(1+i\sqrt3)^6$.
+  \item Tìm các căn bậc $3$ của $8i$.
+  \item Giải phương trình $\bar z=z^2$ trên $\CC$.
+  \item Giải $z^2-2z+5=0$ trên $\CC$.
+  \item Tính $1+\cos x+\cos2x+\dots+\cos nx$ với $x\notin2\pi\ZZ$.
+\end{enumerate}
+\end{ts}
+\newpage
+
+% ---------------- PHẦN C ----------------
+\phan{ĐỊNH NGHĨA GIỚI HẠN DÃY SỐ \ \tagkho}
+
+\muc{C1}{Dãy số và định nghĩa $\eps$--$n_0$ \tagmoi\ \tagkho}
+
+\begin{dn}{Dãy số thực}
+Một \textbf{dãy số thực} là ánh xạ $u:\NN\to\RR$, $n\mapsto u_n$, ký hiệu $(u_n)$. $u_n$ gọi là \textbf{số hạng tổng quát}. Ví dụ: $u_n=1$ (hằng), $u_n=\frac1n$, $u_n=(-1)^n$, $u_n=\big(1+\frac1n\big)^n$.
+\end{dn}
+
+\begin{hy}[ĐỌC TRƯỚC]
+``$u_n\to l$'' nghĩa là: \textbf{muốn $u_n$ gần $l$ đến mức $\eps$ (cho trước, nhỏ tuỳ ý) thì chỉ cần cho $n$ đủ lớn}. Con số ``đủ lớn'' $n_0$ \emph{phụ thuộc $\eps$}: $\eps$ càng nhỏ thì $n_0$ càng lớn. Dãy \emph{không cần} chạm tới $l$: $u_n=\frac n{n+1}$ không bao giờ bằng $1$ mà vẫn có giới hạn $1$.
+\end{hy}
+
+\begin{dn}{Hội tụ, phân kỳ}
+\begin{enumerate}[label=\textbf{\arabic*.}, leftmargin=*, itemsep=2pt, topsep=2pt]
+  \item $\displaystyle\limn u_n=a\in\RR$ nếu $\forall\eps>0,\ \exists n_0\in\NN,\ \forall n\ge n_0:\ |u_n-a|<\eps$. Khi đó $(u_n)$ \textbf{hội tụ về $a$}.
+  \item $\displaystyle\limn u_n=+\infty$ nếu $\forall A>0,\ \exists n_0,\ \forall n\ge n_0:\ u_n>A$. \ $\displaystyle\limn u_n=-\infty$ nếu $\forall B<0,\ \exists n_0,\ \forall n\ge n_0:\ u_n<B$.
+  \item $(u_n)$ \textbf{phân kỳ} nếu không hội tụ về số thực nào (kể cả khi có giới hạn $\pm\infty$).
+\end{enumerate}
+Rõ ràng $u_n\to a\iff(u_n-a)\to0\iff|u_n-a|\to0$.
+\end{dn}
+
+\begin{center}
+\begin{tikzpicture}[font=\small]
+ \fill[badgecolor!15] (0,2.4) rectangle (8,3.6);
+ \draw[->, thick, gray] (0,0) -- (8.3,0) node[right] {$n$};
+ \draw[->, thick, gray] (0,0) -- (0,4.6) node[above] {$u_n$};
+ \draw[dashed, gray] (0,3) -- (8,3);
+ \draw[dashed, badgecolor] (0,2.4) -- (8,2.4);
+ \draw[dashed, badgecolor] (0,3.6) -- (8,3.6);
+ \draw[dashed, maincolor] (2.4,0) -- (2.4,4.3);
+ \foreach \n/\y in {1/1,2/4,3/2.33,4/3.5,5/2.6,6/3.33,7/2.71,8/3.25,9/2.78,10/3.2,11/2.82,12/3.17}{
+   \fill[maincolor] ({0.6*\n},\y) circle (1.8pt);}
+ \node[left] at (0,3) {$l$};
+ \node[left, badgecolor] at (0,3.6) {$l+\eps$};
+ \node[left, badgecolor] at (0,2.4) {$l-\eps$};
+ \node[below, maincolor] at (2.4,0) {$n_0$};
+\end{tikzpicture}\\[2pt]
+{\small\itshape Từ chỉ số $n_0$ trở đi, \emph{mọi} điểm $u_n$ nằm trong dải cam (cách $l$ chưa tới $\eps$). Một số điểm đầu có thể nằm ngoài dải: không sao.}
+\end{center}
+
+\begin{ly}
+\begin{itemize}[leftmargin=*, itemsep=2pt, topsep=2pt]
+  \item Phải là \textbf{mọi} $n\ge n_0$, không phải ``có vài $n$''. Dãy $(-1)^n$ có vô hạn số hạng bằng $1$ nhưng không hội tụ về $1$.
+  \item $\eps$ là số \textbf{cho trước tuỳ ý}; $n_0$ được \emph{chọn sau}, phụ thuộc $\eps$. Chứng minh bằng định nghĩa luôn bắt đầu bằng ``Cho $\eps>0$'' và kết thúc bằng một công thức cho $n_0$.
+  \item $n_0$ không cần nhỏ nhất, chỉ cần \emph{có}. Cứ giải $|u_n-a|<\eps$ rồi lấy $n_0=[\cdot]+1$ (phần nguyên cộng một).
+\end{itemize}
+\end{ly}
+\vspace{0.5cm}
+\begin{vd}{$\displaystyle\limn\frac an=0$}
+Với $a=0$ hiển nhiên. Với $a\ne0$ và $\eps>0$: $\big|\frac an\big|<\eps\iff n>\frac{|a|}\eps$. Chọn $n_0=\big[\frac{|a|}\eps\big]+1$, khi đó $n\ge n_0\Rightarrow\big|\frac an-0\big|<\eps$. \hfill$\blacksquare$
+\end{vd}
+\vspace{0.5cm}
+\begin{vd}{$\displaystyle\limn\frac n{n+1}=1$ \ (dãy không bao giờ bằng giới hạn)}
+Cho $\eps>0$. $\big|\frac n{n+1}-1\big|=\frac1{n+1}<\eps\Leftarrow n>\frac1\eps$. Chọn $n_0=\big[\frac1\eps\big]+1$. \hfill$\blacksquare$
+\end{vd}
+\vspace{0.5cm}
+\begin{vd}{$u_n=\dfrac{3^n+(-3)^n}{4^n}\to0$}
+$n$ lẻ thì $u_n=0$; $n$ chẵn thì $u_n=2\big(\frac34\big)^n$. Luôn có $|u_n|\le2\big(\frac34\big)^n$, mà $\big(\frac34\big)^n\to0$ (Phần E), nên $u_n\to0$ theo nguyên lý kẹp (Phần D).
+\end{vd}
+\vspace{0.5cm}
+\muc{C2}{Dãy bị chặn \tagde}
+\vspace{0.3cm}
+\begin{dn}{Dãy bị chặn}
+$(u_n)$ \textbf{bị chặn trên} nếu $\exists A:\ u_n\le A\ \forall n$; \textbf{bị chặn dưới} nếu $\exists B:\ u_n\ge B\ \forall n$; \textbf{bị chặn} nếu có cả hai, tức $\exists M:\ |u_n|\le M\ \forall n$.
+\end{dn}
+\vspace{0.5cm}
+\begin{ts}
+\begin{enumerate}[label=\bt{C\arabic*.}, leftmargin=*, itemsep=4pt]
+  \item Bằng định nghĩa, chứng minh $\displaystyle\limn\frac{2n-1}{n+1}=2$ (tìm $n_0$ theo $\eps$).
+  \item Bằng định nghĩa, chứng minh $\displaystyle\limn\frac{n^2}{n^3+1}=0$.
+  \item Bằng định nghĩa, chứng minh $\displaystyle\limn\frac{(-1)^n}n=0$.
+  \item Chứng minh: nếu $u_n\to a$ thì $|u_n|\to|a|$. Chiều ngược lại có đúng không?
+  \item Bằng định nghĩa, chứng minh $\displaystyle\limn\frac{1+n^2}{3n-1}=+\infty$.
+\end{enumerate}
+\end{ts}
+\newpage
+% ---------------- PHẦN D ----------------
+\phan{TÍNH CHẤT CỦA DÃY HỘI TỤ}
+
+\muc{D1}{Duy nhất và bị chặn \tagnho}
+
+\begin{tc}{Duy nhất \ \tagnho}
+Nếu $(u_n)$ hội tụ thì giới hạn là \textbf{duy nhất}.
+\end{tc}
+\emph{Chứng minh:} Giả sử $u_n\to A_1$ và $u_n\to A_2$ với $A_1\ne A_2$. Đặt $\eps=\frac12|A_1-A_2|>0$. Có $n_1,n_2$: $|u_n-A_1|<\eps$ ($n\ge n_1$), $|u_n-A_2|<\eps$ ($n\ge n_2$). Với $n\ge\max(n_1,n_2)$: $|A_1-A_2|\le|A_1-u_n|+|u_n-A_2|<2\eps=|A_1-A_2|$: vô lý. \hfill$\blacksquare$
+
+\begin{tc}{Hội tụ $\Rightarrow$ bị chặn \ \tagnho}
+Dãy hội tụ thì bị chặn. Dãy $\to+\infty$ thì bị chặn dưới; dãy $\to-\infty$ thì bị chặn trên.
+\end{tc}
+\emph{Chứng minh:} Giả sử $u_n\to a$. Với $\eps=1$: có $n_0$ để $|u_n-a|<1$ ($n\ge n_0$), nên $|u_n|<1+|a|$. Đặt $M=\max\{|u_0|,\dots,|u_{n_0-1}|,1+|a|\}$ thì $|u_n|\le M$ với mọi $n$ (chỉ có \emph{hữu hạn} số hạng đứng trước $n_0$). Trường hợp $+\infty$ làm tương tự với $A=1$. \hfill$\blacksquare$
+
+\begin{ly}
+Chiều ngược lại \textbf{sai}: $(-1)^n$ bị chặn nhưng phân kỳ. Còn \emph{không bị chặn $\Rightarrow$ phân kỳ} thì đúng (phản đảo). Dãy $\to+\infty$ thì không bị chặn trên, nhưng ngược lại sai: $u_n=(-1)^nn$ không bị chặn mà không có giới hạn.
+\end{ly}
+\vspace{0.5cm}
+\muc{D2}{Phép toán đại số \tagnho}
+
+\begin{tc}{Phép toán \ \tagnho}
+Nếu $x_n\to A$, $y_n\to B$ ($A,B\in\RR$) thì:
+\begin{enumerate}[label=\textbf{\arabic*.}, leftmargin=*, itemsep=2pt, topsep=2pt]
+  \item $x_n\pm y_n\to A\pm B$; \quad $\lambda x_n\to\lambda A$; \quad $x_ny_n\to AB$; \quad $\dfrac{x_n}{y_n}\to\dfrac AB$ nếu $B\ne0$.
+  \item \textbf{VCB nhân bị chặn:} nếu $x_n\to0$ và $(y_n)$ bị chặn thì $x_ny_n\to0$.
+\end{enumerate}
+\end{tc}
+\emph{Chứng minh (rút gọn).} \textbf{Tổng:} cho $\eps>0$, chọn $n_1,n_2$ để $|x_n-A|<\frac\eps2$, $|y_n-B|<\frac\eps2$; với $n\ge\max(n_1,n_2)$: $|x_n+y_n-A-B|<\eps$. \textbf{VCB $\times$ bị chặn:} nếu $|y_n|\le C$, chọn $n_0$ để $|x_n|<\frac\eps C$ thì $|x_ny_n|<\eps$. \textbf{Tích:} $x_ny_n=(x_n-A)y_n+Ay_n$; số hạng đầu $\to0$ (VCB $\times$ bị chặn vì $(y_n)$ hội tụ nên bị chặn), số hạng sau $\to AB$. \textbf{Thương:} chỉ cần $\frac1{y_n}\to\frac1B$: vì $|y_n|\to|B|$ nên $|y_n|>\frac{|B|}2$ từ một chỉ số nào đó, rồi $\big|\frac1{y_n}-\frac1B\big|=\frac{|y_n-B|}{|y_n||B|}<\frac2{B^2}|y_n-B|\to0$. \hfill$\blacksquare$
+
+\begin{ly}
+Các phép toán \textbf{chỉ dùng được khi từng dãy thành phần đều có giới hạn hữu hạn}. Chẳng hạn $\limn(\sqrt{n^2+n}-n)$ \textbf{không} được viết thành $\infty-\infty=0$: đó là dạng vô định, phải biến đổi tiếp (Phần E).
+\end{ly}
+
+\muc{D3}{Thứ tự và nguyên lý kẹp \tagnho}
+\vspace{0.3cm}
+\begin{tc}{Thứ tự \ \tagnho}
+Cho $x_n\to A$, $y_n\to B$.
+\begin{enumerate}[label=\textbf{\arabic*.}, leftmargin=*, itemsep=2pt, topsep=2pt]
+  \item Nếu $A<a$ thì $x_n<a$ từ một chỉ số nào đó; nếu $A>a$ thì $x_n>a$ từ một chỉ số nào đó.
+  \item Nếu $x_n\le y_n$ (từ một chỉ số nào đó) thì $A\le B$.
+  \item Nếu $x_n\le y_n$ và $x_n\to+\infty$ thì $y_n\to+\infty$.
+\end{enumerate}
+\end{tc}
+\emph{Chứng minh (2).} Giả sử $A>B$, đặt $\eps=\frac{A-B}2$. Từ một chỉ số nào đó $x_n>A-\eps=\frac{A+B}2$ và $y_n<B+\eps=\frac{A+B}2$, tức $y_n<x_n$: vô lý. \hfill$\blacksquare$
+\vspace{0.3cm}
+\begin{ly}
+Qua giới hạn, bất đẳng thức \textbf{ngặt biến thành không ngặt}: $x_n=0<\frac1n=y_n$ với mọi $n$ nhưng cả hai $\to0$, không có $0<0$. Vậy từ $x_n<y_n$ chỉ suy ra $A\le B$.
+\end{ly}
+\vspace{0.3cm}
+\begin{tc}{Nguyên lý kẹp \ \tagnho}
+Nếu $x_n\le y_n\le z_n$ từ một chỉ số $n_0$ trở đi và $x_n\to A$, $z_n\to A$ thì $y_n\to A$.
+\end{tc}
+\emph{Chứng minh:} Với $\eps>0$, từ một chỉ số nào đó cả $|x_n-A|<\eps$ và $|z_n-A|<\eps$, nên $-\eps<x_n-A\le y_n-A\le z_n-A<\eps$, tức $|y_n-A|<\eps$. \hfill$\blacksquare$
+\vspace{0.3cm}
+\begin{hy}[CÁCH DÙNG KẸP VÀ ``VCB NHÂN BỊ CHẶN'']
+Để chứng minh $u_n\to a$, ta thường chỉ ra một dãy $\alpha_n\to0$ sao cho $|u_n-a|\le\alpha_n$. Ví dụ $\frac{\sin n^2}n$: $\big|\frac{\sin n^2}n\big|\le\frac1n\to0$.
+\end{hy}
+\vspace{0.3cm}
+\begin{ts}
+\begin{enumerate}[label=\bt{D\arabic*.}, leftmargin=*, itemsep=4pt]
+  \item Đúng hay sai: ``nếu $x_n<y_n$ với mọi $n$ và $x_n\to A$, $y_n\to B$ thì $A<B$''? Cho phản ví dụ nếu sai.
+  \item Tính $\displaystyle\limn\frac{\sin(n^2)}n$.
+  \item Tính $\displaystyle\limn\frac{n+\sin n}{2n-1}$.
+  \item \emph{[ngoài giáo trình]} Cho $x_n\to0$. Có thể bỏ điều kiện ``$(y_n)$ bị chặn'' ở tính chất ``VCB nhân bị chặn'' không? Tìm ví dụ.
+  \item Tính $\displaystyle\limn\sum_{k=1}^n\frac n{n^2+k}$ (dùng kẹp).
+\end{enumerate}
+\end{ts}
+
+% ---------------- PHẦN E ----------------
+\phan{GIỚI HẠN CƠ BẢN VÀ KỸ THUẬT TÍNH}
+
+\muc{E1}{Các giới hạn cần thuộc \tagnho}
+
+\begin{tc}{Bảng giới hạn cơ bản của dãy \ \tagnho}
+\begin{enumerate}[label=\textbf{\arabic*.}, leftmargin=*, itemsep=3pt, topsep=2pt]
+  \item $q^n\to0$ nếu $|q|<1$; $\ q^n\to1$ nếu $q=1$; $\ q^n\to+\infty$ nếu $q>1$; \textbf{không có giới hạn} nếu $q\le-1$.
+  \item $\sqrt[n]a\to1$ với mọi $a>0$; \quad $\sqrt[n]n\to1$.
+  \item Với $a>1$, $\alpha\in\Ns$: $\dfrac{a^n}{n^\alpha}\to+\infty$. \quad Với $a\in\RR$: $\dfrac{a^n}{n!}\to0$.
+  \item $1+q+\dots+q^n=\dfrac{1-q^{n+1}}{1-q}\to\dfrac1{1-q}$ nếu $|q|<1$.
+\end{enumerate}
+Thứ tự ``tăng nhanh'': \ $n^\alpha\ \ll\ a^n\ (a>1)\ \ll\ n!$.
+\end{tc}
+\vspace{0.3cm}
+\emph{Chứng minh (các ý chính).} \\
+\textbf{(1)} $q>1$: viết $q=1+h$, $h>0$, $q^n\ge1+nh\to+\infty$ (khai triển nhị thức). $0<|q|<1$: $\frac1{|q|}>1$ nên $\frac1{|q|^n}\to+\infty$, tức $|q|^n\to0$. $q=-1$: hai dãy con $(q^{2n})\to1$, $(q^{2n+1})\to-1$ (Phần G). \\ \\
+\textbf{(2)} $a>1$: $\sqrt[n]a=1+h_n$, $a\ge1+nh_n$ nên $0<h_n\le\frac{a-1}n\to0$; $0<a<1$ thì lấy nghịch đảo. Với $\sqrt[n]n=1+h_n$: $n\ge1+\frac{n(n-1)}2h_n^2$ nên $0<h_n\le\sqrt{\frac2n}\to0$; kẹp. \\ \\
+\textbf{(3)} Đặt $\sqrt[\alpha]a=1+h$, $h>0$; với $n\ge2$: $(1+h)^n>\frac{n(n-1)}2h^2$, nên $\frac{(\sqrt[\alpha]a)^n}n>\frac{n-1}2h^2\to+\infty$; rồi nâng lên luỹ thừa $\alpha$. Với $\frac{a^n}{n!}$: đặt $n_0=[|a|]+1$, với $n>n_0$ thì $0\le\big|\frac{a^n}{n!}\big|\le\Big(\frac{|a|}1\cdots\frac{|a|}{n_0}\Big)\frac{|a|}n\to0$ (vì mỗi thừa số $\frac{|a|}k<1$ khi $k>n_0$); kẹp. \hfill$\blacksquare$
+\vspace{0.5cm}
+\begin{ly}
+$q^n$ với $q\le-1$: \textbf{không} có giới hạn, kể cả $\pm\infty$ (dãy đổi dấu). Còn $q>1$ thì $q^n\to+\infty$. Đừng viết ``$(-2)^n\to\infty$'' khi chưa nói rõ nghĩa.
+\end{ly}
+\newpage
+\muc{E2}{Gặp bài $\dots$ nên làm gì? \tagnho}
+
+\begin{center}
+\renewcommand{\arraystretch}{1.6}
+\begin{tabularx}{\textwidth}{@{}>{\bfseries\color{maincolor}\raggedright\arraybackslash}p{3.3cm} L L@{}}
+  \rowcolor{maincolor!15}\textbf{Gặp bài $\dots$} & \textbf{Nên làm gì} & \textbf{Ví dụ}\\
+  Tỉ số đa thức theo $n$ ($\frac\infty\infty$) & chia tử, mẫu cho luỹ thừa cao nhất của $n$ & $\dfrac{2n^2+n}{n^2-3}\to2$\\
+  Hiệu hai căn ($\infty-\infty$) & nhân lượng liên hợp & $\sqrt{n^2+n+1}-n=\dfrac{n+1}{\sqrt{n^2+n+1}+n}\to\dfrac12$\\
+  Có $a^n$, $b^n$ lẫn nhau & chia cho cơ số \emph{lớn nhất}, dùng $q^n\to0$ & $\dfrac{3^n+2^n}{3^{n+1}-2^n}\to\dfrac13$\\
+  Tổng $n$ số hạng, có thể rút gọn & tách phân thức (``triệt tiêu liên tiếp'') & $\sum\frac1{k(k+1)}=1-\frac1{n+1}\to1$\\
+  Tổng $n$ số hạng, không rút gọn được & \textbf{kẹp}: thay mỗi số hạng bởi số nhỏ nhất/lớn nhất & $\sum\frac n{n^2+k}\to1$\\
+  Có $\sin n$, $(-1)^n$, $\cos n$ & bị chặn $\Rightarrow$ VCB nhân bị chặn hoặc kẹp & $\frac{\sin n}n\to0$\\
+  Căn bậc $n$: $\sqrt[n]{u_n}$ & kẹp giữa $\sqrt[n]{\min}$ và $\sqrt[n]{\max}$ & $\sqrt[n]{3+\sin n}\to1$\\
+  Dãy cho bởi \textbf{truy hồi} & chứng minh \textbf{chặn} (quy nạp) $+$ \textbf{đơn điệu} $\Rightarrow$ hội tụ, rồi giải $L=f(L)$ & Phần F\\
+\end{tabularx}
+\end{center}
+\vspace{0.5cm}
+\begin{vd}{Kẹp cho tổng: $x_n=\sum_{k=1}^n\dfrac n{an^2+bk}$, $a,b>0$}
+Với $1\le k\le n$: $\dfrac n{an^2+bn}\le\dfrac n{an^2+bk}\le\dfrac n{an^2+b}$. Cộng $n$ bất đẳng thức: $\dfrac{n^2}{an^2+bn}\le x_n\le\dfrac{n^2}{an^2+b}$. Hai vế đều $\to\frac1a$ nên $\limn x_n=\dfrac1a$.
+\end{vd}
+\newpage
+\begin{vd}{Căn bậc $n$: $\sqrt[n]{3+\sin n}\to1$}
+$2\le3+\sin n\le4$ nên $\sqrt[n]2\le\sqrt[n]{3+\sin n}\le\sqrt[n]4$. Hai vế $\to1$ (E1, ý 2); kẹp cho kết quả $1$.
+\end{vd}
+\vspace{0.5cm}
+\begin{vd}{Triệt tiêu liên tiếp}
+$\dfrac1{k(k+1)}=\dfrac1k-\dfrac1{k+1}$ nên $\sum_{k=1}^n\dfrac1{k(k+1)}=1-\dfrac1{n+1}\to1$.
+\end{vd}
+\vspace{0.5cm}
+\begin{ts}
+\begin{enumerate}[label=\bt{E\arabic*.}, leftmargin=*, itemsep=4pt]
+  \item Tính: a) $\displaystyle\limn\big(\sqrt{n^2+3n}-n\big)$ \quad b) $\displaystyle\limn\frac{3^n+2^n}{3^{n+1}-2^n}$ \quad c) $\displaystyle\limn\frac{1000^n}{n!}$ \quad d) $\displaystyle\limn\frac{n^2}{2^n}$ \quad e) $\displaystyle\limn\sqrt[n]{2^n+3^n}$.
+  \item Tính: a) $\displaystyle\limn\sum_{k=1}^n\frac1{k(k+1)}$ \quad b) $\displaystyle\limn\sum_{k=1}^n\frac1{k(k+1)(k+2)}$ \ (gợi ý: tách $\frac12\big[\frac1{k(k+1)}-\frac1{(k+1)(k+2)}\big]$).
+  \item Tính $\displaystyle\limn\big(\sqrt[3]{n+1}-\sqrt[3]n\big)$ (dùng $a^3-b^3=(a-b)(a^2+ab+b^2)$).
+  \item Tính $\displaystyle\limn\Big(1+\frac12+\frac1{2^2}+\dots+\frac1{2^n}\Big)$.
+  \item Tính $\displaystyle\limn\sqrt[n]{n^2+n}$.
+\end{enumerate}
+\end{ts}
+\newpage
+
+% ---------------- PHẦN F ----------------
+\phan{DÃY ĐƠN ĐIỆU VÀ SỐ $e$ \ \tagkho}
+
+\muc{F1}{Dãy đơn điệu \tagmoi}
+
+\begin{dn}{Dãy đơn điệu}
+$(u_n)$ \textbf{tăng} nếu $u_n\le u_{n+1}$ với mọi $n$; \textbf{giảm} nếu $u_n\ge u_{n+1}$ với mọi $n$ (thay $\le,\ge$ bằng $<,>$ thì gọi là \textbf{ngặt}). Dãy tăng hoặc giảm gọi là \textbf{đơn điệu}.
+\end{dn}
+\vspace{0.4cm}
+\begin{tc}{Dãy đơn điệu \ \tagnho}
+\begin{enumerate}[label=\textbf{\arabic*.}, leftmargin=*, itemsep=2pt, topsep=2pt]
+  \item Dãy \textbf{tăng và bị chặn trên} thì hội tụ (về $\sup u_n$). Dãy \textbf{giảm và bị chặn dưới} thì hội tụ (về $\inf u_n$).
+  \item Dãy tăng và \textbf{không} bị chặn trên thì $u_n\to+\infty$. Dãy giảm và không bị chặn dưới thì $u_n\to-\infty$.
+\end{enumerate}
+Hệ quả: dãy tăng chỉ có hai khả năng, hội tụ hoặc $\to+\infty$. Nếu $u_n$ tăng và $\to a$ thì $u_n\le a$ với mọi $n$.
+\end{tc}
+\vspace{0.3cm}
+\emph{Chứng minh:}\\ \textbf{(1)} Theo tính đầy (A2), $l=\sup\{u_n\}$ tồn tại. Với $\eps>0$ có $n_0$ với $u_{n_0}>l-\eps$. Vì dãy tăng, với $n\ge n_0$: $l-\eps<u_{n_0}\le u_n\le l<l+\eps$, tức $|u_n-l|<\eps$. Trường hợp giảm áp dụng cho $(-u_n)$. \\\textbf{(2)} Với $A>0$ có $n_0$: $u_{n_0}>A$; dãy tăng nên $u_n\ge u_{n_0}>A$ ($n\ge n_0$). \hfill$\blacksquare$
+
+\begin{hy}[TÍNH ĐẦY QUAY LẠI]
+Đây chính là tính đầy của $\RR$ ở Phần A viết lại bằng ngôn ngữ dãy: dãy tăng bị chặn trên thì các số hạng ``đáp xuống'' sát $\sup$. Trong $\QQ$ điều này sai: dãy các xấp xỉ thập phân của $\sqrt2$ tăng, bị chặn, nhưng giới hạn không nằm trong $\QQ$.
+\end{hy}
+\vspace{0.4cm}
+\begin{hy}[QUY TRÌNH 4 BƯỚC CHO DÃY TRUY HỒI $x_{n+1}=f(x_n)$]
+\begin{enumerate}[label=\textbf{B\arabic*.}, leftmargin=*, itemsep=1pt, topsep=2pt]
+  \item Chứng minh \textbf{bị chặn} (thường bằng quy nạp hoặc bất đẳng thức Cauchy).
+  \item Chứng minh \textbf{đơn điệu} (xét $x_{n+1}-x_n$, hoặc quy nạp).
+  \item Kết luận \textbf{hội tụ} về $L$.
+  \item Cho $n\to\infty$ trong hệ thức truy hồi: $L=f(L)$, giải ra $L$ và \textbf{loại nghiệm không hợp lệ} (âm khi dãy dương, nhỏ hơn cận dưới, \dots).
+\end{enumerate}
+\end{hy}
+\vspace{0.4cm}
+\begin{ly}
+\textbf{Không được giải $L=f(L)$ trước khi biết dãy hội tụ.} \emph{[ngoài giáo trình, ví dụ minh hoạ]} Dãy $x_0=1$, $x_{n+1}=2x_n$ cho $L=2L\Rightarrow L=0$, nhưng thực ra $x_n=2^n\to+\infty$. Bước B1, B2 là bắt buộc.
+\end{ly}
+
+\begin{vd}{$x_1=5$, $x_{n+1}=\dfrac{x_n^2+5}{2x_n}$ hội tụ về $\sqrt5$}
+Quy nạp: $x_n>0$. Theo bất đẳng thức Cauchy, $x_{n+1}=\frac12\big(x_n+\frac5{x_n}\big)\ge\sqrt5$ nên $x_n\ge\sqrt5$ (bị chặn dưới). Khi đó $\frac5{x_n}\le x_n$, suy ra $x_{n+1}\le\frac12(x_n+x_n)=x_n$ (giảm). Vậy $x_n\to L\ge\sqrt5>0$ và $L=\frac{L^2+5}{2L}\Rightarrow L^2=5\Rightarrow L=\sqrt5$.
+\end{vd}
+
+\begin{vd}{$u_n=\sum_{k=1}^{2n}\dfrac{(-1)^{k-1}}k$ hội tụ}
+$u_{n+1}-u_n=\frac1{2n+1}-\frac1{2n+2}>0$ nên tăng. Mặt khác $u_n=1-\big(\frac12-\frac13\big)-\dots-\big(\frac1{2n-2}-\frac1{2n-1}\big)-\frac1{2n}<1$ nên bị chặn trên. Vậy hội tụ.
+\end{vd}
+
+\muc{F2}{Số $e$ \tagmoi\ \tagkho}
+
+\begin{dn}{Số $e$}
+$e_n=\big(1+\frac1n\big)^n$ là dãy tăng và bị chặn trên bởi $3$. Giới hạn của nó gọi là số $e$:
+\[e=\limn\Big(1+\frac1n\Big)^n\approx2{,}71828\ldots\qquad(2<e\le3).\]
+Logarit cơ số $e$ gọi là logarit tự nhiên, ký hiệu $\ln$.
+\end{dn}
+
+\emph{Chứng minh $(e_n)$ hội tụ.} Theo nhị thức Newton:
+\[e_n=2+\frac1{2!}\Big(1-\frac1n\Big)+\frac1{3!}\Big(1-\frac1n\Big)\Big(1-\frac2n\Big)+\dots+\frac1{n!}\Big(1-\frac1n\Big)\cdots\Big(1-\frac{n-1}n\Big).\]
+\emph{Tăng:} $e_{n+1}$ có nhiều hơn $e_n$ một số hạng dương, và mỗi số hạng chung của $e_{n+1}$ lớn hơn của $e_n$ (vì $1-\frac k{n+1}>1-\frac kn$). \emph{Bị chặn:} bỏ các thừa số $(1-\frac kn)<1$ và dùng $\frac1{k!}\le\frac1{(k-1)k}$ với $k\ge2$: $e_n\le2+\frac1{1\cdot2}+\dots+\frac1{(n-1)n}=3-\frac1n<3$. Dãy tăng, bị chặn trên nên hội tụ. \hfill$\blacksquare$
+
+\begin{tc}{Biểu diễn bằng tổng \ \tagnho}
+$e'_n=\displaystyle\sum_{k=0}^n\frac1{k!}\ \to\ e$.
+\end{tc}
+\emph{Chứng minh:} Từ khai triển trên, $e_n\le e'_n$. Với $n$ cố định và $m>n$, bỏ các số hạng sau số hạng thứ $n$ trong $e_m$: $e_m\ge2+\frac1{2!}\big(1-\frac1m\big)+\dots+\frac1{n!}\big(1-\frac1m\big)\cdots\big(1-\frac{n-1}m\big)$. Cho $m\to\infty$: $e\ge e'_n$. Vậy $e_n\le e'_n\le e$, kẹp cho $e'_n\to e$. \hfill$\blacksquare$
+
+\begin{ts}
+\begin{enumerate}[label=\bt{F\arabic*.}, leftmargin=*, itemsep=4pt]
+  \item Cho $x_1=\sqrt2$, $x_{n+1}=\sqrt{2+x_n}$. Chứng minh $(x_n)$ tăng, bị chặn bởi $2$ và tìm giới hạn.
+  \item Cho $x_0=3$, $x_n=\sqrt{1+x_{n-1}}$. Chứng minh hội tụ và tìm giới hạn.
+  \item Chứng minh $x_n=1+\frac1{2^2}+\dots+\frac1{n^2}$ có giới hạn hữu hạn.
+  \item Chứng minh $x_n=1+\frac1{\sqrt2}+\dots+\frac1{\sqrt n}\to+\infty$.
+  \item Cho $x_0=1$, $x_n=x_{n-1}+\frac1{x_{n-1}}$. Chứng minh $x_n\to+\infty$.
+\end{enumerate}
+\end{ts}
+
+% ---------------- PHẦN G ----------------
+\phan{DÃY KỀ NHAU, DÃY CON, CAUCHY \ \tagkho}
+
+\begin{hy}[SƠ ĐỒ LOGIC CỦA PHẦN G]
+Tất cả bắt nguồn từ \textbf{tính đầy của $\RR$}. Mỗi mũi tên là ``suy ra'':
+\end{hy}
+\begin{center}
+\begin{tikzpicture}[font=\scriptsize,
+  box/.style={draw=maincolor, fill=lightmain, rounded corners=3pt, text width=2.5cm, align=center, minimum height=1cm, inner sep=3pt}]
+\node[box] (a) at (0,0)    {Tính đầy\\ của $\RR$};
+\node[box] (b) at (3.4,0)  {Đơn điệu\\ bị chặn $\Rightarrow$ hội tụ};
+\node[box] (c) at (6.8,0)  {Dãy kề nhau,\\ đoạn lồng nhau};
+\node[box] (d) at (10.2,0) {Bolzano--\\ Weierstrass};
+\node[box] (e) at (13.6,0) {Nguyên lý\\ Cauchy};
+\draw[->, thick, maincolor] (a)--(b);
+\draw[->, thick, maincolor] (b)--(c);
+\draw[->, thick, maincolor] (c)--(d);
+\draw[->, thick, maincolor] (d)--(e);
+\end{tikzpicture}
+\end{center}
+
+\muc{G1}{Dãy kề nhau, đoạn lồng nhau \tagmoi}
+
+\begin{dn}{Dãy kề nhau}
+$(u_n),(v_n)$ gọi là \textbf{kề nhau} nếu $(u_n)$ tăng, $(v_n)$ giảm và $v_n-u_n\to0$.
+\end{dn}
+\vspace{0.4cm}
+\begin{tc}{Dãy kề nhau \ \tagnho}
+Hai dãy kề nhau thì hội tụ về \textbf{cùng một giới hạn} $l$, và $u_n\le l\le v_n$ với mọi $n$.
+\end{tc}
+\vspace{0.3cm}
+\emph{Chứng minh:} $w_n=v_n-u_n$ giảm (vì $v_n$ giảm, $u_n$ tăng) và $\to0$ nên $w_n\ge0$, tức $u_n\le v_n$.\\ Suy ra $(u_n)$ tăng, bị chặn trên bởi $v_0$; $(v_n)$ giảm, bị chặn dưới bởi $u_0$; cả hai hội tụ, về $l_1,l_2$. Từ $l_2-l_1=\lim(v_n-u_n)=0$ ta có $l_1=l_2=l$. Vì $u_n$ tăng về $l$ nên $u_n\le l$; vì $v_n$ giảm về $l$ nên $v_n\ge l$. \hfill$\blacksquare$
+\vspace{0.3cm}
+\begin{tc}{Đoạn lồng nhau (Cantor) \ \tagnho}
+Nếu $[a_{n+1},b_{n+1}]\subseteq[a_n,b_n]$ với mọi $n$ và $b_n-a_n\to0$ thì tồn tại duy nhất $l\in\RR$ thuộc mọi đoạn: $\bigcap_n[a_n,b_n]=\{l\}$.
+\end{tc}
+\emph{Chứng minh:} $(a_n)$ tăng, $(b_n)$ giảm, hiệu $\to0$: kề nhau, nên cùng $\to l$ với $a_n\le l\le b_n$. Duy nhất vì $b_n-a_n\to0$. \hfill$\blacksquare$
+
+\begin{vd}{$x_n=\sum_{k=1}^n\frac1{k^2}$ và $y_n=x_n+\frac1n$ là hai dãy kề nhau}
+$x_{n+1}-x_n=\frac1{(n+1)^2}>0$ nên $x_n$ tăng. $y_{n+1}-y_n=\frac1{(n+1)^2}+\frac1{n+1}-\frac1n=\frac1{(n+1)^2}-\frac1{n(n+1)}=\frac{-1}{n(n+1)^2}<0$ nên $y_n$ giảm. Và $y_n-x_n=\frac1n\to0$. Vậy cả hai hội tụ về cùng một $l$ và $x_n<l<y_n$.
+\end{vd}
+
+\muc{G2}{Dãy con \tagmoi}
+
+\begin{dn}{Dãy con}
+Cho $(u_n)$ và các chỉ số $n_1<n_2<\dots<n_k<\dots$ (tăng ngặt). Dãy $(u_{n_k})_k$ gọi là một \textbf{dãy con} của $(u_n)$. Ví dụ $(u_{2n})$, $(u_{2n+1})$, $(u_{n^2})$ là dãy con; còn $(u_{n^2-n})$ thì \textbf{không} (chỉ số $0,0,2,6,\dots$ lặp lại ở $n=0,1$).
+\end{dn}
+
+\begin{tc}{Dãy con của dãy hội tụ \ \tagnho}
+Nếu $u_n\to a$ (hữu hạn hoặc $\pm\infty$) thì \textbf{mọi} dãy con cũng $\to a$.
+\end{tc}
+\emph{Chứng minh:} Với $\eps>0$ có $n_0$: $|u_n-a|<\eps$ ($n\ge n_0$). Vì $n_k\ge k$ nên với $k\ge n_0$ có $n_k\ge n_0$, do đó $|u_{n_k}-a|<\eps$. \hfill$\blacksquare$
+\vspace{0.3cm}
+\begin{tc}{Hai hệ quả dùng nhiều \ \tagnho}
+\begin{enumerate}[label=\textbf{\arabic*.}, leftmargin=*, itemsep=2pt, topsep=2pt]
+  \item Nếu có \textbf{hai dãy con hội tụ về hai số khác nhau} thì $(u_n)$ \textbf{phân kỳ}. (Ví dụ $(-1)^n$: $u_{2n}\to1$, $u_{2n+1}\to-1$.)
+  \item $u_n\to l\iff u_{2n}\to l$ \textbf{và} $u_{2n+1}\to l$.
+\end{enumerate}
+\end{tc}
+\emph{Chứng minh (2), chiều đủ.} Với $\eps>0$ có $k_1,k_2$: $|u_{2k}-l|<\eps$ ($k\ge k_1$), $|u_{2k+1}-l|<\eps$ ($k\ge k_2$). Với $n\ge\max(2k_1,2k_2+1)$: nếu $n=2k$ thì $k\ge k_1$, nếu $n=2k+1$ thì $k\ge k_2$; cả hai trường hợp $|u_n-l|<\eps$. \hfill$\blacksquare$
+\vspace{0.3cm}
+\begin{ly}
+Chỉ một dãy con hội tụ \textbf{chưa} đủ để dãy hội tụ ($(-1)^n$ có dãy con $(u_{2n})$ hội tụ). Nhưng \textbf{cả hai dãy con chẵn và lẻ} cùng hội tụ về một số thì đủ.
+\end{ly}
+\vspace{0.4cm}
+\begin{vd}{Cho $0\le x_{m+n}\le\dfrac{m+n}{mn}$ với mọi $m,n\in\Ns$. Chứng minh $x_n\to0$}
+Lấy $m=n$: $0\le x_{2n}\le\frac2n\to0$. Lấy $m=n+1$: $0\le x_{2n+1}\le\frac{2n+1}{n(n+1)}\to0$. Theo hệ quả 2, $x_n\to0$.
+\end{vd}
+
+\begin{vd}{$x_0=1$, $x_n=\dfrac3{x_{n-1}}+2$ hội tụ về $3$ (dãy chẵn, lẻ)}
+Quy nạp $x_n>0$. Tính $x_{n+2}$ theo $x_n$: $x_{n+2}=\dfrac{7x_n+6}{2x_n+3}$, suy ra
+\[x_{n+2}-3=\frac{x_n-3}{2x_n+3},\qquad x_{n+2}-x_n=\frac{2(x_n+1)(3-x_n)}{2x_n+3}.\]
+\emph{Dãy chẵn:} $x_0=1<3$ nên $x_{2n}<3$ và $x_{2n+2}>x_{2n}$: tăng, bị chặn trên, hội tụ về $L$ với $L=\frac{7L+6}{2L+3}$, tức $L^2-2L-3=0$, $L=3$ (loại $-1$ vì $x_n>0$). \emph{Dãy lẻ:} $x_1=5>3$ nên $x_{2n+1}>3$ và giảm: hội tụ về $3$. Theo hệ quả 2, $x_n\to3$.
+\end{vd}
+
+\begin{tc}{Bolzano--Weierstrass \ \tagnho}
+Từ mọi dãy \textbf{bị chặn} đều trích được một dãy con \textbf{hội tụ}.
+\end{tc}
+\emph{Chứng minh (chia đôi).} Cho $a_0\le x_n\le b_0$. Chia $[a_0,b_0]$ làm hai nửa; ít nhất một nửa chứa \textbf{vô hạn} số hạng của dãy, gọi là $[a_1,b_1]$. Lặp lại: được $[a_k,b_k]\subset[a_{k-1},b_{k-1}]$ chứa vô hạn số hạng và $b_k-a_k=\frac{b_0-a_0}{2^k}\to0$. Chọn $x_{n_k}\in[a_k,b_k]$ với $n_k>n_{k-1}$ (làm được vì có vô hạn số hạng). Đoạn lồng nhau co về $x^*$ và $a_k\le x_{n_k}\le b_k$ nên $x_{n_k}\to x^*$. \hfill$\blacksquare$
+
+\muc{G3}{Dãy Cauchy \tagmoi\ \tagkho}
+
+\begin{dn}{Dãy Cauchy}
+$(x_n)$ là \textbf{dãy Cauchy} nếu $\forall\eps>0,\ \exists n_0,\ \forall n,m\ge n_0:\ |x_n-x_m|<\eps$.
+\end{dn}
+
+\begin{tc}{Nguyên lý Cauchy \ \tagnho}
+$(x_n)$ hội tụ $\iff$ $(x_n)$ là dãy Cauchy.
+\end{tc}
+\emph{Chứng minh:} ($\Rightarrow$) Nếu $x_n\to x^*$: với $\eps>0$ có $n_0$ để $|x_n-x^*|<\frac\eps2$ ($n\ge n_0$), nên $|x_n-x_m|<\eps$ với $n,m\ge n_0$. ($\Leftarrow$) Ứng với $\eps=1$ có $n_1$: $|x_n-x_{n_1}|<1$ ($n\ge n_1$), nên dãy bị chặn. Theo Bolzano--Weierstrass có dãy con $x_{n_k}\to x^*$. Cho $\eps>0$: có $n_0\ge n_1$ để $|x_n-x_m|<\frac\eps2$ với $n,m\ge n_0$; chọn $k$ đủ lớn để $n_k\ge n_0$ và $|x_{n_k}-x^*|<\frac\eps2$. Khi đó với $n\ge n_0$: $|x_n-x^*|\le|x_n-x_{n_k}|+|x_{n_k}-x^*|<\eps$. \hfill$\blacksquare$
+
+\begin{hy}[DÙNG ĐỂ LÀM GÌ?]
+Nguyên lý Cauchy cho phép chứng minh dãy hội tụ \textbf{mà không cần biết trước giới hạn}: chỉ cần so sánh các số hạng với nhau. Dạng phủ định (để chứng minh \emph{phân kỳ}): tồn tại $\eps_0>0$ sao cho với mọi $n_0$ đều có $n,m\ge n_0$ với $|x_n-x_m|\ge\eps_0$.
+\end{hy}
+
+\begin{vd}{$x_n=1+\frac12+\dots+\frac1n$ phân kỳ}
+Với $m=2n$: $|x_{2n}-x_n|=\frac1{n+1}+\dots+\frac1{2n}\ge n\cdot\frac1{2n}=\frac12$ với mọi $n$. Vậy không phải dãy Cauchy (lấy $\eps_0=\frac12$), nên phân kỳ.
+\end{vd}
+
+\begin{ly}
+Dãy thoả $x_{n+1}-x_n\to0$ \textbf{chưa} chắc hội tụ: chính dãy điều hoà trên có $x_{n+1}-x_n=\frac1{n+1}\to0$ nhưng phân kỳ. Cauchy đòi hỏi $|x_n-x_m|$ nhỏ với \textbf{mọi cặp} $n,m$ lớn, không chỉ hai số liền kề.
+\end{ly}
+
+\begin{ts}
+\begin{enumerate}[label=\bt{G\arabic*.}, leftmargin=*, itemsep=4pt]
+  \item Chứng minh $u_n=\cos\frac{n\pi}2$ phân kỳ.
+  \item Dùng nguyên lý Cauchy, chứng minh $x_n=\sum_{k=1}^n\frac{\sin k}{2^k}$ hội tụ.
+  \item Chứng minh $u_n=\sum_{k=0}^n\frac1{k!}$ và $v_n=u_n+\frac1{n\cdot n!}$ ($n\ge1$) là hai dãy kề nhau. Từ đó rút ra kết luận về $u_n$ và $e$.
+  \item \tagkho\ Nếu ba dãy con $(x_{2n})$, $(x_{2n+1})$, $(x_{3n})$ đều hội tụ thì $(x_n)$ hội tụ.
+  \item Đúng hay sai? a) Dãy bị chặn có một dãy con hội tụ. \quad b) Dãy có một dãy con hội tụ thì hội tụ. \quad c) Dãy có hai dãy con hội tụ về hai số khác nhau thì phân kỳ. \quad d) Dãy Cauchy thì bị chặn.
+\end{enumerate}
+\end{ts}
+\newpage
+
+\begin{tcolorbox}[enhanced, breakable, colback=lightmain, colframe=maincolor, arc=5pt, boxrule=1.2pt,
+  coltitle=white, fonttitle=\bfseries, title={TRANG GHI NHỚ CHƯƠNG 1 \enspace (chép 1 mặt vào vở)}, left=10pt, right=10pt]
+\begin{itemize}[leftmargin=*, itemsep=3pt, topsep=2pt]
+  \item $\RR$ \textbf{đầy}: tập khác rỗng bị chặn trên có $\sup$. $M=\sup X\iff M$ là cận trên và $\forall\eps\ \exists\alpha\in X:\ M-\eps<\alpha\le M$. $\QQ$ trù mật trong $\RR$. $|x+y|\le|x|+|y|$, $\big||x|-|y|\big|\le|x-y|$.
+  \item $z=x+iy=r(\cos\theta+i\sin\theta)=re^{i\theta}$; nhân: nhân môđun, cộng acgumen. Moivre $z^n=r^n(\cos n\theta+i\sin n\theta)$. Căn bậc $n$: \textbf{$n$ giá trị} $\sqrt[n]r\,e^{i(\theta+2k\pi)/n}$, $k=0,\dots,n-1$.
+  \item $u_n\to a\iff\forall\eps>0\ \exists n_0\ \forall n\ge n_0:\ |u_n-a|<\eps$. Giới hạn \textbf{duy nhất}; hội tụ $\Rightarrow$ \textbf{bị chặn} (ngược lại sai).
+  \item Phép toán chỉ dùng khi giới hạn hữu hạn; VCB $\times$ bị chặn $=$ VCB. Qua giới hạn, $<$ chỉ còn $\le$. \textbf{Kẹp:} $x_n\le y_n\le z_n$, $x_n,z_n\to A\Rightarrow y_n\to A$.
+  \item $q^n\to0$ ($|q|<1$); $\sqrt[n]a\to1$; $\sqrt[n]n\to1$; $n^\alpha\ll a^n\ll n!$. $q\le-1$: $q^n$ không có giới hạn.
+  \item \textbf{Đơn điệu $+$ bị chặn $\Rightarrow$ hội tụ.} Dãy truy hồi: chặn $\to$ đơn điệu $\to$ hội tụ $\to$ giải $L=f(L)$ (loại nghiệm sai). $e=\lim\big(1+\frac1n\big)^n=\lim\sum_{k=0}^n\frac1{k!}$.
+  \item Dãy kề nhau (tăng, giảm, hiệu $\to0$) $\Rightarrow$ cùng giới hạn. Đoạn lồng nhau co về một điểm.
+  \item Hội tụ $\Rightarrow$ mọi dãy con cùng giới hạn. Hai dãy con khác giới hạn $\Rightarrow$ phân kỳ. $u_n\to l\iff u_{2n},u_{2n+1}\to l$.
+  \item Bolzano--Weierstrass: bị chặn $\Rightarrow$ có dãy con hội tụ. \textbf{Cauchy:} hội tụ $\iff$ $\forall\eps\ \exists n_0\ \forall n,m\ge n_0:\ |x_n-x_m|<\eps$.
+\end{itemize}
+\end{tcolorbox}
+
+% ########################################################
+% ########################################################
+%                         ĐÁP ÁN
+% ########################################################
+% ########################################################
+\bai{ĐÁP ÁN}{ĐÁP ÁN}{Đáp án các bài thử sức của Bài 1, Bài 2, Bài 3 và Tổng hợp chương}
+\begin{center}\small\itshape Làm xong từng phần rồi mới xem. Đáp án khác cách làm của bạn chưa chắc là sai: hãy so sánh \emph{ý}, không chỉ so sánh kết quả.\end{center}
+
+% ======================= ĐÁP ÁN BÀI 1 =======================
+\dapanbai{Đáp án Bài 1: Số thực}
+
+\begin{tcolorbox}[enhanced, breakable, colback=white, colframe=maincolor!70, arc=4pt, boxrule=0.8pt, left=9pt, right=9pt]
+\dapanphan{A}
+\ans{A1.} $-3\in\ZZ$; \ $0{,}75=\tfrac34\in\QQ$; \ $\sqrt9=3\in\NN$; \ $\sqrt3\in\RR\setminus\QQ$; \ $0{,}333\ldots=\tfrac13\in\QQ$; \ $\pi\in\RR\setminus\QQ$.
+\ans{A2.} Giả sử $\sqrt3=\frac mn$ tối giản. Thì $m^2=3n^2$, nên $3\mid m^2$, nên $3\mid m$ (vì $3$ là số nguyên tố). Viết $m=3p$: $9p^2=3n^2\Rightarrow n^2=3p^2\Rightarrow3\mid n$. Vậy $m,n$ cùng chia hết cho $3$, trái với tối giản. Suy ra $\sqrt3$ vô tỉ.
+\ans{A3.} \textbf{Vô tỉ}, vì phần thập phân vô hạn và \emph{không tuần hoàn} (số chữ số $0$ giữa các chữ số $1$ cứ tăng dần, không lặp lại theo chu kỳ).
+\end{tcolorbox}
+\vspace{0.4cm}
+\begin{tcolorbox}[enhanced, breakable, colback=white, colframe=maincolor!70, arc=4pt, boxrule=0.8pt, left=9pt, right=9pt]
+\dapanphan{B}
+\ans{B1.} a) \textbf{Sai}: $\sqrt2+(-\sqrt2)=0$. \quad b) \textbf{Sai}: $\sqrt2\cdot\sqrt2=2$. \quad c) \textbf{Đúng} (xem Lưu ý ở B1).
+\ans{B2.} $ac>bc$ (nhân số âm thì đổi chiều).
+\ans{B3.} a) $x+5<y+5$. \quad b) $-3x>-3y$.
+\end{tcolorbox}
+\vspace{0.4cm}
+\begin{tcolorbox}[enhanced, breakable, colback=white, colframe=maincolor!70, arc=4pt, boxrule=0.8pt, left=9pt, right=9pt]
+\dapanphan{C}
+\ans{C1.} a) $\inf=\min=2$; \ $\sup=5$, \textbf{không có} $\max$ ($5\notin X$).\\
+b) Các số $\tfrac12<\tfrac23<\tfrac34<\cdots$ tăng dần và tiến tới $1$ nhưng không chạm: $\inf=\min=\tfrac12$; \ $\sup=1$, không có $\max$.\\
+c) $x^2<4\iff-2<x<2$, tập $(-2;\,2)$: $\inf=-2$, $\sup=2$, không có $\max$, $\min$.
+\ans{C2.} a) \textbf{Đúng} (đó là định nghĩa của $\max$). \quad b) \textbf{Sai}: ví dụ $(0;1)$ bị chặn trên nhưng không có $\max$.
+\ans{C3.} Các số $2,\ \tfrac32,\ \tfrac43,\ \tfrac54,\dots$ giảm dần về $1$ nhưng không chạm. $\sup=\max=2$ (đạt tại $n=1$); \ $\inf=1$, \textbf{không có} $\min$ ($1\notin X$).
+\ans{C4.} Ví dụ $x=0{,}9995\in(0;1)$ và $0{,}9995>0{,}999$. (Bất kỳ $x\in(0{,}999;\,1)$ đều được.)
+\end{tcolorbox}
+\vspace{0.4cm}
+\begin{tcolorbox}[enhanced, breakable, colback=white, colframe=maincolor!70, arc=4pt, boxrule=0.8pt, left=9pt, right=9pt]
+\dapanphan{D}
+\ans{D1.} a) $[-1;\,4)$ \quad b) $(2;\,+\infty)$ \quad c) $(-\infty;\,0]$.
+\ans{D2.} $-1,\ 0,\ 1,\ 2,\ 3$ \ (không có $-2$ vì đầu mút $-2$ bị loại; có $3$ vì đầu mút $3$ được lấy).
+\ans{D3.} $+\infty$; \quad $-\infty$; \quad $-\infty$.
+\ans{D4.} Phép \textbf{b} và \textbf{d} không xác định. (a và c tính được: $+\infty$ và $-\infty$.)
+\end{tcolorbox}
+\vspace{0.4cm}
+\begin{tcolorbox}[enhanced, breakable, colback=white, colframe=maincolor!70, arc=4pt, boxrule=0.8pt, left=9pt, right=9pt]
+\dapanphan{E}
+\ans{E1.} $|-7|=7$; \quad $|3-5|=2$; \quad $\sqrt5>2$ nên $|2-\sqrt5|=\sqrt5-2$.
+\ans{E2.} a) $-3<x-2<3\iff-1<x<5$, tức $(-1;\,5)$.\\
+b) $-2\le x+1\le2\iff-3\le x\le1$, tức $[-3;\,1]$.\\
+c) $x\ge4$ hoặc $x\le-4$, tức $(-\infty;\,-4]\cup[4;\,+\infty)$.\\
+d) $-3<2x-1<3\iff-2<2x<4\iff-1<x<2$, tức $(-1;\,2)$.
+\ans{E3.} $d(-2,5)=|-2-5|=7$. \quad $d(x,3)<0{,}5\iff|x-3|<0{,}5\iff2{,}5<x<3{,}5$.
+\ans{E4.} $|x+y|=|-10|=10$ và $|x|+|y|=4+6=10$: \textbf{có} dấu ``$=$'', vì $x,y$ \emph{cùng dấu} (cùng âm).
+\end{tcolorbox}
+
+% ======================= ĐÁP ÁN BÀI 2 =======================
+\dapanbai{Đáp án Bài 2: Số phức}
+
+\begin{tcolorbox}[enhanced, breakable, colback=white, colframe=maincolor!70, arc=4pt, boxrule=0.8pt, left=9pt, right=9pt]
+\dapanphan{A}
+\ans{A1.} $i^{15}$: $15=4\cdot3+3\Rightarrow i^3=-i$. \quad $i^{100}=1$ ($100$ chia hết $4$). \quad $i^{2027}$: $2027=4\cdot506+3\Rightarrow-i$.
+\ans{A2.} $x+2y=5$ và $2x-y=5$. Từ phương trình sau $y=2x-5$; thay vào: $x+4x-10=5\Rightarrow x=3$, $y=1$.
+\ans{A3.} $\Delta'=1-10=-9=(3i)^2$, nên $z=-1\pm3i$.
+\ans{A4.} a) \textbf{Đúng} ($\RR\subset\CC$). b) \textbf{Sai} ($\CC$ không có thứ tự; thật ra không so sánh $i$ với $0$). c) \textbf{Sai}: $\Imz(3+2i)=2$. d) \textbf{Đúng}.
+\end{tcolorbox}
+\vspace{0.4cm}
+\begin{tcolorbox}[enhanced, breakable, colback=white, colframe=maincolor!70, arc=4pt, boxrule=0.8pt, left=9pt, right=9pt]
+\dapanphan{B}
+\ans{B1.} a) $|3i|=3$, $\theta=\frac\pi2$. \quad b) $|-2|=2$, $\theta=\pi$. \quad c) $r=\sqrt2$, $\cos\theta=\frac1{\sqrt2}$, $\sin\theta=-\frac1{\sqrt2}\Rightarrow\theta=-\frac\pi4$. \quad d) $r=\sqrt{3+1}=2$, $\cos\theta=-\frac{\sqrt3}2$, $\sin\theta=-\frac12\Rightarrow\theta=-\frac{5\pi}6$ (hay $\frac{7\pi}6$).
+\ans{B2.} $1+\sqrt3 i=2\big(\cos\frac\pi3+i\sin\frac\pi3\big)$; \ $-1+i=\sqrt2\big(\cos\frac{3\pi}4+i\sin\frac{3\pi}4\big)$. \ $4\big(\cos\frac\pi6+i\sin\frac\pi6\big)=2\sqrt3+2i$; \ $2\big(\cos\frac{3\pi}2+i\sin\frac{3\pi}2\big)=-2i$.
+\ans{B3.} a) Đường tròn tâm $O$, bán kính $2$. \quad b) Hình tròn mở tâm $1$ (điểm $(1;0)$), bán kính $1$. \quad c) Đường thẳng đứng $x=1$.
+\ans{B4.} Điểm $(-1;1)$ ở góc phần tư II ($\cos\theta<0$, $\sin\theta>0$), còn $\arctan(-1)=-\frac\pi4$ cho điểm ở góc phần tư IV. Đúng là $\theta=\frac{3\pi}4$.
+\end{tcolorbox}
+\vspace{0.4cm}
+\begin{tcolorbox}[enhanced, breakable, colback=white, colframe=maincolor!70, arc=4pt, boxrule=0.8pt, left=9pt, right=9pt]
+\dapanphan{C}
+\ans{C1.} a) $4+3i$. \quad b) $6-8i+3i-4i^2=10-5i$. \quad c) $1+2i+i^2=2i$. \quad d) $(1-i)^2=-2i$, nên $(1-i)^4=(-2i)^2=-4$.
+\ans{C2.} $\cj z=3+4i$; \ $|z|=\sqrt{9+16}=5$; \ $z\cj z=(3-4i)(3+4i)=9+16=25=|z|^2$.
+\ans{C3.} a) $\dfrac{1-2i}5$. \quad b) $\dfrac{(1+i)^2}{2}=\dfrac{2i}2=i$. \quad c) $\dfrac{(2+3i)(1-i)}2=\dfrac{2-2i+3i+3}2=\dfrac{5+i}2$.
+\ans{C4.} $(2-i)z=4-3i\Rightarrow z=\dfrac{(4-3i)(2+i)}5=\dfrac{8+4i-6i+3}5=\dfrac{11-2i}5$.
+\ans{C5.} $|z|=1\Rightarrow z\cj z=|z|^2=1\Rightarrow\cj z=\dfrac1z$.
+\end{tcolorbox}
+\vspace{0.4cm}
+\begin{tcolorbox}[enhanced, breakable, colback=white, colframe=maincolor!70, arc=4pt, boxrule=0.8pt, left=9pt, right=9pt]
+\dapanphan{D}
+\ans{D1.} a) $1+i=\sqrt2e^{i\pi/4}\Rightarrow(1+i)^8=(\sqrt2)^8e^{2\pi i}=16$. \quad b) $\sqrt3-i=2e^{-i\pi/6}\Rightarrow(\sqrt3-i)^6=64e^{-i\pi}=-64$.
+\ans{D2.} Đại số: $(1-i)(\sqrt3+i)=\sqrt3+i-\sqrt3i+1=(\sqrt3+1)+(1-\sqrt3)i$. \ Lượng giác: $1-i=\sqrt2e^{-i\pi/4}$, $\sqrt3+i=2e^{i\pi/6}$, tích có môđun $2\sqrt2$ và acgumen $-\frac\pi4+\frac\pi6=-\frac\pi{12}$. So hai kết quả: $2\sqrt2\cos\frac\pi{12}=\sqrt3+1$ nên $\cos\frac\pi{12}=\dfrac{\sqrt6+\sqrt2}4$; \ $-2\sqrt2\sin\frac\pi{12}=1-\sqrt3$ nên $\sin\frac\pi{12}=\dfrac{\sqrt6-\sqrt2}4$.
+\ans{D3.} $|1-i|^{10}=(\sqrt2)^{10}=32$, $\Arg=-\frac{10\pi}4=-\frac{5\pi}2$. \ $|\sqrt3+i|^6=64$, $\Arg=6\cdot\frac\pi6=\pi$. Vậy $|z|=\frac{32}{64}=\frac12$, $\Arg z=-\frac{5\pi}2-\pi=-\frac{7\pi}2\equiv\frac\pi2$. Suy ra $z=\frac12\big(\cos\frac\pi2+i\sin\frac\pi2\big)=\dfrac i2$.
+\ans{D4.} $|z_1\pm z_2|^2=(z_1\pm z_2)(\cj{z_1}\pm\cj{z_2})=|z_1|^2+|z_2|^2\pm(z_1\cj{z_2}+\cj{z_1}z_2)$. Cộng hai đẳng thức, hai số hạng $\pm(\dots)$ triệt tiêu nhau, ra $2(|z_1|^2+|z_2|^2)$. (Ý nghĩa hình học: trong hình bình hành, tổng bình phương hai đường chéo bằng tổng bình phương bốn cạnh.)
+\end{tcolorbox}
+\vspace{0.4cm}
+\begin{tcolorbox}[enhanced, breakable, colback=white, colframe=maincolor!70, arc=4pt, boxrule=0.8pt, left=9pt, right=9pt]
+\dapanphan{E}
+\ans{E1.} $w=a+bi$: $a^2-b^2=5$, $2ab=12$, $a^2+b^2=|5+12i|=13$. Suy ra $a^2=9$, $b^2=4$, $ab>0$: $w=\pm(3+2i)$. Kiểm tra: $(3+2i)^2=9+12i-4=5+12i$.
+\ans{E2.} $-8=8(\cos\pi+i\sin\pi)$, $|z|=2$, $\arg z=\frac{\pi+2k\pi}3$: $k=0$: $2\big(\frac12+\frac{\sqrt3}2i\big)=1+\sqrt3i$; \ $k=1$: $2(\cos\pi+i\sin\pi)=-2$; \ $k=2$: $1-\sqrt3i$.
+\ans{E3.} $\omega_k=\cos\frac{k\pi}3+i\sin\frac{k\pi}3$: $1;\ \frac12+\frac{\sqrt3}2i;\ -\frac12+\frac{\sqrt3}2i;\ -1;\ -\frac12-\frac{\sqrt3}2i;\ \frac12-\frac{\sqrt3}2i$.
+\ans{E4.} Nhân hai vế với $z$: $z^4=z\cj z=|z|^2$. Lấy môđun: $|z|^4=|z|^2\Rightarrow|z|=0$ hoặc $|z|=1$. Nếu $z=0$: thỏa. Nếu $|z|=1$ thì $z^4=1$, nên $z\in\{1,i,-1,-i\}$. Thử lại (chẳng hạn $z=i$: $i^3=-i=\cj i$): thỏa. Tập nghiệm: $\{0,\,1,\,i,\,-1,\,-i\}$.
+\ans{E5.} $\omega=e^{i\pi/3}$ nên $\omega^6=1$ và $\omega\ne1$, do đó tổng $=\dfrac{1-\omega^6}{1-\omega}=0$ (chính là tổng $6$ căn bậc $6$ của $1$).
+\end{tcolorbox}
+\newpage
+\begin{tcolorbox}[enhanced, breakable, colback=white, colframe=maincolor!70, arc=4pt, boxrule=0.8pt, left=9pt, right=9pt]
+\dapanphan{F}
+\ans{F1.} Phần thực của $(\cos\theta+i\sin\theta)^4$: $\cos4\theta=c^4-6c^2s^2+s^4$ (với $c=\cos\theta$, $s=\sin\theta$). Thay $s^2=1-c^2$: $c^4-6c^2(1-c^2)+(1-c^2)^2=8c^4-8c^2+1$. Vậy $\cos4\theta=8\cos^4\theta-8\cos^2\theta+1$.
+\ans{F2.} a) $(2i\sin\theta)^4=16\sin^4\theta=z^4-4z^2+6-\frac4{z^2}+\frac1{z^4}=2\cos4\theta-8\cos2\theta+6$. Vậy $\sin^4\theta=\dfrac{\cos4\theta-4\cos2\theta+3}8$.\\
+b) $(2\cos\theta)^5=z^5+5z^3+10z+\frac{10}z+\frac5{z^3}+\frac1{z^5}=2\cos5\theta+10\cos3\theta+20\cos\theta$. Vậy $\cos^5\theta=\dfrac{\cos5\theta+5\cos3\theta+10\cos\theta}{16}$.
+\ans{F3.} $S=\sum_{k=0}^{n-1}\cos(\theta+k\theta)$: dùng công thức 1 với $a=b=\theta$ và $n-1$ thay cho $n$: $S=\dfrac{\sin\frac{n\theta}2}{\sin\frac\theta2}\cos\Big(\theta+\dfrac{(n-1)\theta}2\Big)=\dfrac{\sin\frac{n\theta}2\,\cos\frac{(n+1)\theta}2}{\sin\frac\theta2}$.
+\ans{F4.} Công thức 2 với $a=0$, $b=\theta$: $\displaystyle\sum_{k=0}^nC_n^k\sin k\theta=\Big(2\cos\frac\theta2\Big)^n\sin\frac{n\theta}2$.
+\end{tcolorbox}
+
+% ======================= ĐÁP ÁN BÀI 3 =======================
+
+\dapanbai{Đáp án Bài 3: Dãy số thực}
+
+\begin{tcolorbox}[enhanced, breakable, colback=white, colframe=maincolor!70, arc=4pt, boxrule=0.8pt, left=9pt, right=9pt]
+\dapanphan{A}
+\ans{A1.} $\Big|\dfrac{3n+1}{n+2}-3\Big|=\dfrac5{n+2}<\dfrac5n<\eps$ khi $n>\dfrac5\eps$. Chọn $n_0=\EE\big(\frac5\eps\big)+1$. Với $\eps=0{,}01$: $n_0=501$ (thực ra $n\ge499$ đã đủ vì $\frac5{501}<0{,}01$).
+\ans{A2.} Phủ định: $(\exists\eps>0)(\forall n_0)(\exists n\ge n_0)\ |u_n|\ge\eps$. Với $u_n=(-1)^n$ lấy $\eps=\frac12$: mọi $n$ đều có $|u_n|=1\ge\frac12$, nên $(u_n)\not\to0$.
+\ans{A3.} $\Big|\dfrac{(-1)^n}n-0\Big|=\dfrac1n<\eps$ khi $n>\dfrac1\eps$; chọn $n_0=\EE\big(\frac1\eps\big)+1$.
+\ans{A4.} Cho $A>0$. $n^2-3>A\iff n>\sqrt{A+3}$. Chọn $n_0=\EE\big(\sqrt{A+3}\big)+1$; với $n\ge n_0$ thì $n^2-3>A$.
+\end{tcolorbox}
+\vspace{0.4cm}
+\begin{tcolorbox}[enhanced, breakable, colback=white, colframe=maincolor!70, arc=4pt, boxrule=0.8pt, left=9pt, right=9pt]
+\dapanphan{B}
+\ans{B1.} a) Bị chặn ($|\sin n|\le1$). \ b) Bị chặn: $0\le\frac n{n+1}<1$. \ c) Chặn dưới bởi $0$ (thực ra bởi $2$), \emph{không} chặn trên. \ d) Không bị chặn (số hạng chẵn $\to+\infty$, số hạng lẻ $\to-\infty$).
+\ans{B2.} a) \textbf{Sai} ($(-1)^n$). \ b) \textbf{Đúng} (vì hội tụ $\Rightarrow$ bị chặn). \ c) \textbf{Đúng}. \ d) \textbf{Sai} ($(-1)^nn$).
+\end{tcolorbox}
+\newpage
+\begin{tcolorbox}[enhanced, breakable, colback=white, colframe=maincolor!70, arc=4pt, boxrule=0.8pt, left=9pt, right=9pt]
+\dapanphan{C}
+\ans{C1.} a) $\frac32$ (ví dụ trong bài). \ b) $0$ (liên hợp). \ c) $\dfrac{2^n+3^n}{3^{n+1}}=\dfrac13\Big[\Big(\dfrac23\Big)^n+1\Big]\to\dfrac13$. \ d) $\Big|\dfrac{\sin n}n\Big|\le\dfrac1n\to0$ nên $\to0$.
+\ans{C2.} Với $1\le k\le n$: $\dfrac1{\sqrt{n^2+n}}\le\dfrac1{\sqrt{n^2+k}}\le\dfrac1{\sqrt{n^2+1}}$. Cộng: $\dfrac n{\sqrt{n^2+n}}\le u_n\le\dfrac n{\sqrt{n^2+1}}$. Hai vế $=\dfrac1{\sqrt{1+1/n}}$ và $\dfrac1{\sqrt{1+1/n^2}}$ đều $\to1$, nên $u_n\to1$.
+\ans{C3.} $\big||u_n|-|a|\big|\le|u_n-a|\to0$ nên $|u_n|\to|a|$. Chiều ngược lại \textbf{sai} nếu $a\ne0$: $u_n=(-1)^n$ có $|u_n|\to1$ nhưng $u_n$ phân kì. Chiều ngược lại \textbf{đúng} khi $a=0$ ($u_n\to0\iff|u_n|\to0$).
+\ans{C4.} Lấy $\eps=\frac a2>0$: tồn tại $n_0$ với $\forall n\ge n_0:\ |u_n-a|<\frac a2$, suy ra $u_n>a-\frac a2=\frac a2$.
+\end{tcolorbox}
+\vspace{0.4cm}
+\begin{tcolorbox}[enhanced, breakable, colback=white, colframe=maincolor!70, arc=4pt, boxrule=0.8pt, left=9pt, right=9pt]
+\dapanphan{D}
+\ans{D1.} $a=2>1$, $k=2$: $\dfrac{n^2}{2^n}\to0$ (D3, ý 1).
+\ans{D2.} $\dfrac{n!}{n^n}=\dfrac1n\cdot\dfrac2n\cdots\dfrac nn$; thừa số đầu $=\frac1n$, các thừa số còn lại $\le1$, nên $0<\frac{n!}{n^n}\le\frac1n\to0$. Kẹp cho giới hạn $0$.
+\ans{D3.} $\dfrac{3^n}{n!}\to0$ (D3, ý 2 với $a=3$). Do đó $\dfrac{n!}{3^n}=\dfrac1{3^n/n!}\to+\infty$ (nghịch đảo của dãy dương $\to0$).
+\ans{D4.} $n^{1/n}\le(n+1)^{1/n}\le(2n)^{1/n}=2^{1/n}\,n^{1/n}$ (với $n\ge1$). Hai vế $\to1$ (D2), nên giới hạn bằng $1$.
+\ans{D5.} $3\le(2^n+3^n)^{1/n}\le(2\cdot3^n)^{1/n}=3\cdot2^{1/n}\to3$. Giới hạn bằng $3$.
+\end{tcolorbox}
+\vspace{0.4cm}
+\begin{tcolorbox}[enhanced, breakable, colback=white, colframe=maincolor!70, arc=4pt, boxrule=0.8pt, left=9pt, right=9pt]
+\dapanphan{E}
+\ans{E1.} \emph{Bị chặn:} $x_1=\sqrt2<2$; nếu $x_n<2$ thì $x_{n+1}=\sqrt{2+x_n}<\sqrt4=2$. Vậy $0<x_n<2$. \emph{Tăng:} $x_{n+1}^2-x_n^2=2+x_n-x_n^2=(2-x_n)(1+x_n)>0$, nên $x_{n+1}>x_n$. Tăng và bị chặn trên nên hội tụ về $a\ge\sqrt2>0$. Qua giới hạn: $a=\sqrt{2+a}\Rightarrow a^2-a-2=0\Rightarrow a=2$ (loại $a=-1$). Vậy $x_n\to2$.
+\ans{E2.} $u_n$ tăng (cộng thêm số dương). Với $k\ge2$: $\frac1{k^2}<\frac1{k-1}-\frac1k$, nên $u_n<1+\big(1-\frac1n\big)<2$. Tăng và bị chặn trên nên hội tụ.
+\ans{E3.} $u_n$ tăng (cộng thêm $\frac1{(n+1)!}>0$). $v_{n+1}-v_n=\dfrac1{(n+1)!}\Big(1+\dfrac1{n+1}-\dfrac{n+1}n\Big)=\dfrac1{(n+1)!}\Big(\dfrac1{n+1}-\dfrac1n\Big)<0$, nên $(v_n)$ giảm. $v_n-u_n=\dfrac1{n\cdot n!}\to0$. Vậy kề nhau.
+\ans{E4.} a) $\Big(1+\frac1n\Big)^{n+1}=\Big(1+\frac1n\Big)^n\Big(1+\frac1n\Big)\to e\cdot1=e$. \ b) $\Big[\Big(1+\frac1n\Big)^n\Big]^2\to e^2$. \ c) $\Big(1-\frac1n\Big)^n=\Big(\frac{n-1}n\Big)^n=\dfrac1{\Big(1+\frac1{n-1}\Big)^n}=\dfrac1{\Big(1+\frac1{n-1}\Big)^{n-1}\Big(1+\frac1{n-1}\Big)}\to\dfrac1{e\cdot1}=\dfrac1e$ (dãy $\big(1+\frac1{n-1}\big)^{n-1}$ chính là $e_{n-1}$, đổi chỉ số vẫn $\to e$).
+\end{tcolorbox}
+\newpage
+\begin{tcolorbox}[enhanced, breakable, colback=white, colframe=maincolor!70, arc=4pt, boxrule=0.8pt, left=9pt, right=9pt]
+\dapanphan{F}
+\ans{F1.} $u_{4k}=\sin(2k\pi)=0\to0$ và $u_{4k+1}=\sin\big(2k\pi+\frac\pi2\big)=1\to1$. Hai dãy con có giới hạn khác nhau nên $(u_n)$ phân kì.
+\ans{F2.} $u_{2n}=1+\frac1{2n}\to1$, $u_{2n+1}=-1+\frac1{2n+1}\to-1$. Hai giới hạn khác nhau nên $(u_n)$ phân kì (dù bị chặn).
+\ans{F3.} $|u_n|=\frac n{n+1}<1$ nên bị chặn. $u_{2n}=\frac{2n}{2n+1}\to1$, $u_{2n+1}=-\frac{2n+1}{2n+2}\to-1$: hai dãy con có giới hạn khác nhau nên phân kì. Dãy con hội tụ: chẳng hạn $(u_{2n})\to1$.
+\ans{F4.} $|z_n|=\dfrac{(\sqrt2)^n}{2^n}=\Big(\dfrac{\sqrt2}2\Big)^n\to0$ (D1, vì $\frac{\sqrt2}2<1$), nên $z_n\to0$: \textbf{hội tụ}. Với $w_n=i^n$ có $\Rez w_{4k}=1$ và $\Rez w_{4k+2}=-1$, hai dãy con của phần thực có giới hạn khác nhau, nên $\Rez w_n$ phân kì, suy ra $(w_n)$ \textbf{phân kì}.
+\end{tcolorbox}
+% ======================= ĐÁP ÁN TỔNG HỢP =======================
+
+\dapanbai{Đáp án Tổng hợp chương 1}
+
+\begin{tcolorbox}[enhanced, breakable, colback=white, colframe=maincolor!70, arc=4pt, boxrule=0.8pt, left=9pt, right=9pt]
+\dapanphan{A}
+\ans{A1.} Giả sử $\sqrt3=\frac mn$, ước chung lớn nhất bằng $1$. Khi đó $m^2=3n^2$ nên $3\mid m^2$, suy ra $3\mid m$ (vì $3$ nguyên tố), $m=3p$. Suy ra $9p^2=3n^2$, $n^2=3p^2$, nên $3\mid n$. Vậy $m,n$ có ước chung $3$: mâu thuẫn.
+\ans{A2.} $n$ lẻ: $-1+\frac1n\in[-1;0]$ (với $n=1$ là $0$). $n$ chẵn: $1+\frac1n\le\frac32$, đạt tại $n=2$. Vậy $\sup E=\max E=\frac32$. Mọi phần tử $>-1$ và $-1+\frac1n\to-1$ (có phần tử sát $-1$ tuỳ ý) nên $\inf E=-1$, \textbf{không đạt được} nên không có $\min$.
+\ans{A3.} Giả sử $q=\sqrt2+\sqrt3\in\QQ$. Khi đó $\sqrt3=q-\sqrt2$, bình phương: $3=q^2-2q\sqrt2+2$, nên $\sqrt2=\frac{q^2-1}{2q}$ (có $q>0$) là số hữu tỉ: mâu thuẫn với $\sqrt2\notin\QQ$.
+\ans{A4.} $\frac n{n+1}=1-\frac1{n+1}$ tăng theo $n$, nhỏ nhất tại $n=1$: $\min X=\inf X=\frac12$. Mọi phần tử $<1$ và $1-\frac1{n+1}>1-\eps$ khi $n>\frac1\eps$, nên $\sup X=1$, nhưng $1\notin X$ nên \textbf{không có $\max$}.
+\ans{A5.} a) $-3\le2x-1\le3\iff-1\le x\le2$, tập nghiệm $[-1;2]$. \ b) $|x+1|>2\iff x+1>2$ hoặc $x+1<-2$, tức $x\in(-\infty;-3)\cup(1;+\infty)$.
+\end{tcolorbox}
+\vspace{0.4cm}
+\begin{tcolorbox}[enhanced, breakable, colback=white, colframe=maincolor!70, arc=4pt, boxrule=0.8pt, left=9pt, right=9pt]
+\dapanphan{B}
+\ans{B1.} a) $\frac{(1+i)(2+i)}5=\frac{2+i+2i-1}5=\frac{1+3i}5$. \ b) $(1+i)^{10}=32i$ (như ví dụ). \ c) $1+i\sqrt3=2\big(\cos\frac\pi3+i\sin\frac\pi3\big)$ nên $(\cdot)^6=2^6(\cos2\pi+i\sin2\pi)=64$.
+\ans{B2.} $8i=8\big(\cos\frac\pi2+i\sin\frac\pi2\big)$, nên $\omega_k=2\big(\cos(\frac\pi6+\frac{2k\pi}3)+i\sin(\frac\pi6+\frac{2k\pi}3)\big)$: $\omega_0=\sqrt3+i$, $\omega_1=-\sqrt3+i$, $\omega_2=-2i$. (Kiểm tra: $(-2i)^3=-8i^3=8i$.)
+\ans{B3.} Lấy môđun: $|z|=|z|^2\Rightarrow z=0$ hoặc $|z|=1$. Nếu $|z|=1$ thì $\bar z=\frac1z$, phương trình thành $\frac1z=z^2$, tức $z^3=1$. Nghiệm: $0,\ 1,\ -\frac12+\frac{\sqrt3}2i,\ -\frac12-\frac{\sqrt3}2i$.
+\ans{B4.} $\Delta=4-20=-16=(4i)^2$ nên $z=\frac{2\pm4i}2=1\pm2i$.
+\ans{B5.} Dùng ví dụ B5 với $a=0$, $b=x$: $\ \displaystyle\sum_{k=0}^n\cos kx=\cos\frac{nx}2\cdot\frac{\sin\frac{(n+1)x}2}{\sin\frac x2}$. (Kiểm tra $n=1$: $\cos\frac x2\cdot\frac{\sin x}{\sin\frac x2}=2\cos^2\frac x2=1+\cos x$.)
+\end{tcolorbox}
+\vspace{0.4cm}
+\begin{tcolorbox}[enhanced, breakable, colback=white, colframe=maincolor!70, arc=4pt, boxrule=0.8pt, left=9pt, right=9pt]
+\dapanphan{C}
+\ans{C1.} $\big|\frac{2n-1}{n+1}-2\big|=\frac3{n+1}<\eps\Leftarrow n>\frac3\eps$. Chọn $n_0=\big[\frac3\eps\big]+1$.
+\ans{C2.} $0<\frac{n^2}{n^3+1}<\frac{n^2}{n^3}=\frac1n<\eps$ khi $n>\frac1\eps$. Chọn $n_0=\big[\frac1\eps\big]+1$.
+\ans{C3.} $\big|\frac{(-1)^n}n-0\big|=\frac1n<\eps$ khi $n>\frac1\eps$; $n_0=\big[\frac1\eps\big]+1$.
+\ans{C4.} $\big||u_n|-|a|\big|\le|u_n-a|<\eps$ với $n\ge n_0$ của $u_n\to a$. Chiều ngược lại \textbf{sai}: $u_n=(-1)^n$ có $|u_n|=1\to1$ nhưng $u_n$ phân kỳ. (Riêng khi $a=0$ thì hai chiều tương đương.)
+\ans{C5.} Với $n\ge1$: $3n-1\le3n$ nên $\frac{1+n^2}{3n-1}\ge\frac{1+n^2}{3n}>\frac n3$. Cho $A>0$: $\frac n3>A\iff n>3A$. Chọn $n_0=[3A]+1$.
+\end{tcolorbox}
+\vspace{0.4cm}
+\begin{tcolorbox}[enhanced, breakable, colback=white, colframe=maincolor!70, arc=4pt, boxrule=0.8pt, left=9pt, right=9pt]
+\dapanphan{D}
+\ans{D1.} \textbf{Sai.} $x_n=0<\frac1n=y_n$ với mọi $n$ nhưng $A=B=0$. Chỉ suy ra được $A\le B$.
+\ans{D2.} $\big|\frac{\sin n^2}n\big|\le\frac1n\to0$, nên giới hạn bằng $0$ (hoặc: $\frac1n\to0$ nhân dãy bị chặn $\sin n^2$).
+\ans{D3.} Chia tử, mẫu cho $n$: $\frac{1+\frac{\sin n}n}{2-\frac1n}$. Vì $\frac{\sin n}n\to0$ nên giới hạn là $\frac12$.
+\ans{D4.} \emph{[ngoài giáo trình]} Không bỏ được. $x_n=\frac1n\to0$, $y_n=n^2$ (không bị chặn) cho $x_ny_n=n\to+\infty$.
+\ans{D5.} Với $1\le k\le n$: $\frac n{n^2+n}\le\frac n{n^2+k}\le\frac n{n^2+1}$. Cộng $n$ số hạng: $\frac{n^2}{n^2+n}\le x_n\le\frac{n^2}{n^2+1}$. Hai vế $\to1$, nên $x_n\to1$.
+\end{tcolorbox}
+\vspace{0.4cm}
+\begin{tcolorbox}[enhanced, breakable, colback=white, colframe=maincolor!70, arc=4pt, boxrule=0.8pt, left=9pt, right=9pt]
+\dapanphan{E}
+\ans{E1.} a) $\sqrt{n^2+3n}-n=\frac{3n}{\sqrt{n^2+3n}+n}=\frac3{\sqrt{1+3/n}+1}\to\frac32$. \ b) chia cho $3^n$: $\frac{1+(2/3)^n}{3-(2/3)^n}\to\frac13$. \ c) $\to0$ (giai thừa tăng nhanh hơn mũ). \ d) $\to0$ (nghịch đảo của $\frac{2^n}{n^2}\to+\infty$). \ e) $3\le\sqrt[n]{2^n+3^n}\le3\sqrt[n]2$, hai vế $\to3$ nên giới hạn là $3$.
+\ans{E2.} a) $1-\frac1{n+1}\to1$. \ b) $\frac1{k(k+1)(k+2)}=\frac12\big[\frac1{k(k+1)}-\frac1{(k+1)(k+2)}\big]$, tổng $=\frac12\big[\frac12-\frac1{(n+1)(n+2)}\big]\to\frac14$.
+\ans{E3.} $\sqrt[3]{n+1}-\sqrt[3]n=\dfrac1{\sqrt[3]{(n+1)^2}+\sqrt[3]{n(n+1)}+\sqrt[3]{n^2}}$. Mỗi căn ở mẫu $\ge\sqrt[3]{n^2}$ nên $0<(\cdot)\le\frac1{3\sqrt[3]{n^2}}\to0$; giới hạn bằng $0$.
+\ans{E4.} Tổng $=\dfrac{1-(1/2)^{n+1}}{1-1/2}\to2$.
+\ans{E5.} $n\le n^2+n\le2n^2$ nên $\sqrt[n]n\le\sqrt[n]{n^2+n}\le\sqrt[n]2\,(\sqrt[n]n)^2$. Hai vế $\to1$ nên giới hạn là $1$.
+\end{tcolorbox}
+\newpage
+\begin{tcolorbox}[enhanced, breakable, colback=white, colframe=maincolor!70, arc=4pt, boxrule=0.8pt, left=9pt, right=9pt]
+\dapanphan{F}
+\ans{F1.} Quy nạp: $x_1=\sqrt2<2$; nếu $x_n<2$ thì $x_{n+1}=\sqrt{2+x_n}<2$. Tăng: $x_{n+1}>x_n\iff2+x_n>x_n^2\iff(2-x_n)(x_n+1)>0$, đúng vì $0<x_n<2$. Hội tụ về $L$ với $L^2=2+L$, $L=2$ (loại $-1$).
+\ans{F2.} Đặt $\varphi=\frac{1+\sqrt5}2$, $\varphi^2=1+\varphi$. Quy nạp: $x_0=3>\varphi$; nếu $x_{n-1}>\varphi$ thì $x_n=\sqrt{1+x_{n-1}}>\sqrt{1+\varphi}=\varphi$. Giảm: $x_n^2-x_{n-1}^2=1+x_{n-1}-x_{n-1}^2<0$ vì $t^2-t-1>0$ khi $t>\varphi$. Giảm và bị chặn dưới nên hội tụ về $L$, $L^2=1+L$, $L\ge\varphi>0$ nên $L=\frac{1+\sqrt5}2$.
+\ans{F3.} $x_n$ tăng. Với $k\ge2$: $\frac1{k^2}\le\frac1{k(k-1)}=\frac1{k-1}-\frac1k$, nên $x_n\le1+\big(1-\frac1n\big)<2$. Tăng, bị chặn trên nên hội tụ.
+\ans{F4.} Mỗi số hạng $\frac1{\sqrt k}\ge\frac1{\sqrt n}$ ($k\le n$) nên $x_n\ge\frac n{\sqrt n}=\sqrt n\to+\infty$.
+\ans{F5.} $x_n>0$ và $x_n$ tăng (vì $\frac1{x_{n-1}}>0$). Nếu bị chặn thì hội tụ về $L\ge1$ và $L=L+\frac1L$ cho $\frac1L=0$: vô lý. Vậy không bị chặn trên, nên $x_n\to+\infty$.
+\end{tcolorbox}
+\vspace{0.4cm}
+\begin{tcolorbox}[enhanced, breakable, colback=white, colframe=maincolor!70, arc=4pt, boxrule=0.8pt, left=9pt, right=9pt]
+\dapanphan{G}
+\ans{G1.} $u_{4k}=\cos2k\pi=1\to1$, $u_{4k+2}=\cos(2k+1)\pi=-1\to-1$. Hai dãy con có giới hạn khác nhau nên $(u_n)$ phân kỳ.
+\ans{G2.} Với $m>n$: $|x_m-x_n|\le\sum_{k=n+1}^m\frac{|\sin k|}{2^k}\le\sum_{k=n+1}^m\frac1{2^k}<\frac1{2^n}$. Vì $\frac1{2^n}\to0$, cho $\eps>0$ chọn $n_0$ với $\frac1{2^{n_0}}<\eps$; khi $m>n\ge n_0$ có $|x_m-x_n|<\eps$. Dãy Cauchy nên hội tụ.
+\ans{G3.} $u_n$ tăng ngặt. $v_{n+1}-v_n=\frac1{(n+1)!}+\frac1{(n+1)(n+1)!}-\frac1{n\cdot n!}=\frac1{n!}\Big[\frac{n+2}{(n+1)^2}-\frac1n\Big]=\frac{-1}{n!\,n(n+1)^2}<0$, nên $v_n$ giảm. Và $v_n-u_n=\frac1{n\cdot n!}\to0$. Vậy kề nhau, cùng giới hạn $l$ (chính là $e$ nhờ Phần F) và $u_n<e<v_n$, tức $0<e-u_n<\frac1{n\cdot n!}$.
+\ans{G4.} Gọi giới hạn của ba dãy con là $l_1,l_2,l_3$. $(x_{6n})$ là dãy con của cả $(x_{2n})$ và $(x_{3n})$ nên $l_1=l_3$. $(x_{6n+3})$ là dãy con của cả $(x_{2n+1})$ và $(x_{3n})$ nên $l_2=l_3$. Vậy $l_1=l_2=l_3$, và theo hệ quả (chẵn, lẻ) $x_n\to l_1$.
+\ans{G5.} a) \textbf{Đúng} (Bolzano--Weierstrass). \ b) \textbf{Sai}: $(-1)^n$. \ c) \textbf{Đúng}. \ d) \textbf{Đúng} (chứng minh trong nguyên lý Cauchy: dãy Cauchy bị chặn).
+\end{tcolorbox}
+
+\end{document}
