@@ -1,0 +1,214 @@
+% !TEX program = lualatex
+%% =====================================================================
+%%  ĐẠI SỐ - CHƯƠNG 3: MA TRẬN VÀ ĐỊNH THỨC
+%%  BÀI 1. MA TRẬN VÀ CÁC PHÉP TOÁN (mục 3.1 -> 3.4 của giáo trình)
+%%  Biên dịch bằng LuaLaTeX (hoặc XeLaTeX).
+%% =====================================================================
+\documentclass[11pt, a4paper, twoside]{article}
+\usepackage[a4paper, margin=1.8cm, top=1.6cm, bottom=2.4cm]{geometry}
+\usepackage{fontspec}
+\usepackage[english, vietnamese, bidi=basic, provide=*]{babel}
+\babelprovide[import, onchar=ids fonts]{vietnamese}
+
+% Load font giống như mẫu Giải tích để tránh bị lỗi font có chân
+\IfFontExistsTF{Montserrat}{\babelfont{rm}{Montserrat}}{\babelfont{rm}{Latin Modern Roman}}
+
+\usepackage{amsmath, amssymb}
+\usepackage{tikz}
+\usetikzlibrary{shapes, arrows.meta, calc, decorations.pathreplacing, matrix, positioning, fit, backgrounds}
+\usepackage{enumitem}
+\usepackage[table]{xcolor}
+\usepackage{fancyhdr}
+\usepackage{tabularx}
+\usepackage{array}
+\usepackage{needspace}
+\usepackage{tcolorbox}
+\tcbuselibrary{skins, breakable}
+
+\setlength{\parindent}{0pt}
+\setlength{\parskip}{4pt}
+\linespread{1.12}
+
+% --------------------------------------------------------
+% MÀU SẮC
+% --------------------------------------------------------
+\definecolor{maincolor}{HTML}{0D5C3A}
+\definecolor{lightmain}{HTML}{F0FDF4}
+\definecolor{anscolor}{HTML}{B91C1C}
+\definecolor{badgecolor}{HTML}{D97706}
+\definecolor{infocolor}{HTML}{1D4ED8}
+\definecolor{newcolor}{HTML}{7C3AED}
+
+\newcommand{\tacgia}{Nhật Thịnh - N26DCCN273}
+\newcolumntype{L}{>{\raggedright\arraybackslash}X}
+
+% --------------------------------------------------------
+% KÝ HIỆU
+% --------------------------------------------------------
+\newcommand{\RR}{\mathbb{R}}
+\newcommand{\CC}{\mathbb{C}}
+\newcommand{\ZZ}{\mathbb{Z}}
+\newcommand{\MM}{\mathcal{M}}                          % tập ma trận
+\newcommand{\Tt}{^{\mathsf{t}}}                        % chuyển vị: A^t
+\newcommand{\mat}[1]{\begin{bmatrix}#1\end{bmatrix}}   % ma trận ngoặc vuông
+\newcommand{\vmat}[1]{\begin{vmatrix}#1\end{vmatrix}}  % định thức
+\newcommand{\vect}[1]{\textcolor{maincolor}{#1}}
+\newcommand{\rk}{\operatorname{r}}                     % hạng: r(A)
+
+% --------------------------------------------------------
+% NHÃN (BADGE) NHỎ
+% --------------------------------------------------------
+\newcommand{\badge}[2]{\tikz[baseline=(b.base)]\node[fill=#1, text=white, rounded corners=2pt, inner xsep=4pt, inner ysep=2pt, font=\scriptsize\bfseries](b){#2};}
+\newcommand{\tagmoi}{\badge{newcolor}{MỚI}}
+\newcommand{\tagkho}{\badge{anscolor}{KHÓ}}
+\newcommand{\tagde}{\badge{maincolor}{DỄ}}
+\newcommand{\tagnho}{\badge{maincolor}{GHI NHỚ}}
+\newcommand{\taghieu}{\badge{infocolor}{HIỂU Ý}}
+\newcommand{\tagluu}{\badge{badgecolor}{LƯU Ý}}
+\newcommand{\tagthu}{\badge{badgecolor}{THỬ SỨC}}
+
+% --------------------------------------------------------
+% TIÊU ĐỀ PHẦN, MỤC NHỎ, TIÊU ĐỀ KHÔNG ĐÁNH CHỮ
+% --------------------------------------------------------
+\newcounter{phan}
+\newcommand{\phan}[1]{%
+  \refstepcounter{phan}\par\vspace{0.45cm}\noindent
+  \begin{tikzpicture}
+    \node[fill=maincolor, text=white, rounded corners=3pt, inner xsep=9pt, inner ysep=5pt, font=\bfseries\large, anchor=south west](n) at (0,0) {PHẦN \Alph{phan}};
+    \node[text=maincolor, font=\bfseries\Large, anchor=south west] at ([xshift=9pt]n.south east) {#1};
+    \draw[maincolor, thick] ([yshift=-3pt]n.south west) -- ++(\textwidth,0);
+  \end{tikzpicture}\par\nobreak\vspace{0.15cm}}
+
+\newcommand{\muc}[2]{%
+  \par\needspace{9\baselineskip}\vspace{7pt}\noindent{\color{maincolor}\rule[-2pt]{4pt}{13pt}}\hspace{5pt}%
+  \textbf{\color{maincolor!90!black}\large #1\quad #2}\par\nobreak\vspace{3pt}}
+
+\newcommand{\tieude}[1]{%
+  \par\vspace{0.45cm}\noindent
+  \begin{tikzpicture}
+    \node[fill=maincolor, text=white, rounded corners=3pt, inner xsep=9pt, inner ysep=5pt, font=\bfseries\large, anchor=south west](n) at (0,0) {#1};
+    \draw[maincolor, thick] ([yshift=-3pt]n.south west) -- ++(\textwidth,0);
+  \end{tikzpicture}\par\nobreak\vspace{0.15cm}}
+
+% --------------------------------------------------------
+% CÁC HỘP NỘI DUNG
+% --------------------------------------------------------
+\tcbset{bx/.style={enhanced, breakable, arc=4pt, boxrule=0.9pt, coltitle=white,
+  fonttitle=\bfseries\small, toptitle=2pt, bottomtitle=2pt,
+  left=9pt, right=9pt, top=6pt, bottom=6pt, before skip=8pt, after skip=8pt}}
+
+\newtcolorbox{dn}[1]{bx, colback=lightmain, colframe=maincolor, title={ĐỊNH NGHĨA \enspace #1}}
+\newtcolorbox{tc}[1]{bx, colback=white, colframe=maincolor!85!black, title={TÍNH CHẤT / ĐỊNH LÝ \enspace #1}}
+\newtcolorbox{vd}[1]{bx, colback=white, colframe=maincolor!55, title={VÍ DỤ \enspace #1}}
+\newtcolorbox{ly}{bx, colback=badgecolor!8, colframe=badgecolor, title={LƯU Ý}}
+\newtcolorbox{hy}[1][HIỂU Ý]{bx, colback=infocolor!6, colframe=infocolor, title={#1}}
+\newtcolorbox{ts}[1][]{bx, colback=newcolor!5, colframe=newcolor, title={THỬ SỨC \enspace #1}}
+\newtcolorbox{de}[1]{bx, colback=maincolor!4, colframe=maincolor, title={ĐỀ BÀI \enspace #1}}
+\newtcolorbox{kq}{bx, colback=anscolor!5, colframe=anscolor, before upper=\raggedright, title={ĐÁP SỐ}}
+
+\newcommand{\bt}[1]{\textbf{\color{badgecolor}#1}}
+\newcommand{\ans}[2]{\par\noindent{\color{anscolor}\bfseries #1\quad}#2\par\vspace{2pt}}
+
+% --------------------------------------------------------
+% HEADER & FOOTER
+% --------------------------------------------------------
+\pagestyle{fancy}
+\fancyhf{}
+\renewcommand{\headrulewidth}{0pt}
+\renewcommand{\footrulewidth}{0pt}
+\newcommand{\fpage}{\ifnum\value{page}<10 0\fi\thepage}
+\fancyfoot[RO]{%
+  \begin{tikzpicture}
+    \shade[left color=white, right color=maincolor!20, rounded corners=3pt] (0,0) rectangle (2.2, 0.65);
+    \node[text=maincolor, font=\bfseries\Large] at (1.5, 0.32) {\fpage \hspace{2pt} \rule[-2pt]{1.2pt}{12pt}};
+  \end{tikzpicture}}
+\fancyfoot[LE]{%
+  \begin{tikzpicture}
+    \shade[left color=maincolor!20, right color=white, rounded corners=3pt] (0,0) rectangle (2.2, 0.65);
+    \node[text=maincolor, font=\bfseries\Large] at (0.7, 0.32) {\rule[-2pt]{1.2pt}{12pt} \hspace{2pt} \fpage};
+  \end{tikzpicture}}
+\fancyfoot[LO]{\small\color{maincolor!70}Đại số \,·\, Chương 3 \,·\, Bài 1: Ma trận và các phép toán}
+\fancyfoot[RE]{\small\color{maincolor!70}Đại số \,·\, Chương 3 \,·\, Bài 1: Ma trận và các phép toán}
+
+\begin{document}
+
+% ========================================================
+% TIÊU ĐỀ
+% ========================================================
+\noindent
+\begin{tikzpicture}
+  \path[fill=maincolor]     (0, 0)   -- (0.5, 0) -- (0.3, -0.3) -- (-0.2, -0.3) -- cycle;
+  \path[fill=maincolor!75]  (0.6, 0) -- (1.1, 0) -- (0.9, -0.3) -- (0.4, -0.3) -- cycle;
+  \path[fill=maincolor!50]  (1.2, 0) -- (1.7, 0) -- (1.5, -0.3) -- (1.0, -0.3) -- cycle;
+  \path[fill=maincolor!25]  (1.8, 0) -- (2.3, 0) -- (2.1, -0.3) -- (1.6, -0.3) -- cycle;
+  \draw[maincolor, thick] (2.6, -0.15) -- ({\textwidth-4.6cm}, -0.15);
+  \node[fill=maincolor, text=white, font=\bfseries, rounded corners=3pt, inner sep=5pt, anchor=east]
+    at (\textwidth, -0.15) {Biên soạn: \tacgia};
+\end{tikzpicture}
+
+\vspace{0.7cm}
+
+\begin{center}
+  {\small\bfseries\color{maincolor} HỌC PHẦN ĐẠI SỐ \,·\, CHƯƠNG 3: MA TRẬN VÀ ĐỊNH THỨC}\\[4pt]
+  {\Large\bfseries\color{maincolor} BÀI 1. MA TRẬN VÀ CÁC PHÉP TOÁN}\\[2pt]
+  {\large\bfseries\color{maincolor!80!black} Từ khái niệm đầu tiên đến ma trận sơ cấp (mục 3.1 $\to$ 3.4)}\\[4pt]
+  {\small\itshape Tài liệu tự học cho sinh viên năm nhất, soạn theo giáo trình Đại số, Chương 3}
+\end{center}
+
+\vspace{0.3cm}
+{\color{maincolor}\rule{\textwidth}{1.2pt}}
+\vspace{0.1cm}
+
+\begin{hy}[BÀI NÀY NÓI VỀ CÁI GÌ? (đọc 30 giây)]
+Ma trận chỉ là \textbf{một bảng số chữ nhật}. Cả bài xoay quanh ba việc:
+\begin{enumerate}[label=\textbf{(\arabic*)}, leftmargin=*, itemsep=1pt, topsep=2pt]
+  \item \textbf{Biết đọc và viết ma trận}: cỡ $m\times n$, phần tử $a_{ij}$, cộng, nhân với một số, chuyển vị (Phần A, D).
+  \item \textbf{Nhân hai ma trận} (``hàng nhân cột'') và dùng nó để tính đa thức, luỹ thừa ma trận (Phần B, C). Đây là chỗ \textbf{khó nhất} của bài, mình sẽ đi thật chậm.
+  \item \textbf{Dùng ma trận để ghi chép chuyện khác}: toạ độ véc tơ, đổi cơ sở, hạng, và các phép biến đổi sơ cấp (Phần E, F, G).
+\end{enumerate}
+Mỗi khái niệm đều đi theo ba bước: \textbf{lời thường} $\to$ \textbf{định nghĩa chính xác} $\to$ \textbf{ví dụ số nhỏ tính từng bước}.
+\end{hy}
+
+\begin{center}
+\begin{tikzpicture}[font=\small,
+  st/.style={draw=#1, fill=#1!8, rounded corners=4pt, thick, text width=4.2cm, align=center, minimum height=1.5cm, inner sep=4pt},
+  ez/.style={-{Stealth}, very thick, maincolor}]
+1.   \node[st=maincolor]  (a) at (2.4,0)  {\textbf{Lời thường
+}\\ nó là gì, để làm gì};
+  \node[st=infocolor]  (b) at (8.5,0)  {\textbf{2. Định nghĩa}\\ viết chính xác bằng ký hiệu};
+  \node[st=badgecolor] (c) at (14.6,0) {\textbf{3. Ví dụ số nhỏ}\\ tính từng bước, có hình};
+  \draw[ez] (a) -- (b);
+  \draw[ez] (b) -- (c);
+\end{tikzpicture}
+\end{center}
+
+\begin{center}
+\renewcommand{\arraystretch}{1.5}
+\renewcommand{\tabularxcolumn}[1]{m{#1}}
+\begin{tabularx}{\textwidth}{@{}>{\centering\arraybackslash\bfseries\color{maincolor}}m{1.5cm} L >{\centering\arraybackslash}m{2.9cm}@{}}
+  \rowcolor{maincolor!15}\textbf{Phần} & \textbf{Nội dung} & \textbf{Mức độ}\\
+  A & Khái niệm ma trận, hai ma trận bằng nhau, cộng, nhân với một số, không gian véc tơ $\MM_{m\times n}$ & \tagde\\
+  B & \textbf{Nhân ma trận}: quy tắc hàng nhân cột, điều kiện kích thước, không giao hoán, ma trận đơn vị & \tagmoi\ \tagluu\\
+  C & Đa thức của ma trận, luỹ thừa ma trận, tìm quy luật & \tagkho\\
+  D & Chuyển vị, ma trận đối xứng và phản đối xứng & \tagde\ \tagluu\\
+  E & Ma trận của một hệ véc tơ, ma trận chuyển cơ sở, đổi toạ độ & \tagmoi\ \tagkho\\
+  F & Hạng của ma trận, đưa về dạng bậc thang bằng biến đổi cột & \tagmoi\\
+  G & Ma trận sơ cấp: $R(k,\lambda)$, $P(i,j)$, $Q(i,j,\lambda)$ & \tagmoi\ \tagluu\\
+\end{tabularx}
+\end{center}
+
+\begin{tcolorbox}[colback=maincolor!5, colframe=maincolor!20, arc=5pt, boxrule=1pt, left=15pt, right=15pt, top=8pt, bottom=8pt]
+\begin{center}
+\small
+\renewcommand{\arraystretch}{1.5}
+\begin{tabular}{@{}l@{\;}l@{\qquad}l@{\;}l@{}}
+  \tagnho & chép vào vở, học thuộc & \taghieu & chỉ cần hiểu ý\\
+  \tagmoi & kiến thức mới so với THPT & \tagkho & chỗ khó, đọc chậm\\
+  \tagluu & dễ nhầm, dễ sai & \tagthu & tự làm lại cho nhớ\\
+\end{tabular}
+\end{center}
+\end{tcolorbox}
+
+\begin{tcolorbox}[colback=white, colframe=maincolor!40, arc=5pt, boxrule=0.8pt, left=12pt, right=12pt, top=6pt, bottom=6pt]
+\small\textbf{\color{maincolor}Câu chuyện nhỏ.} Ma trận nghe có vẻ ``cổ'' nhưng thật ra rất trẻ: phép nhân hai ma trận vuông cấp 3 xuất hiện lần đầu năm 1801 (Gauss), cái tên ``ma trận'' do Sylvester đặt năm 1850, và Cayley là người mô tả tổng quát các phép tính cùng ma trận nghịch đảo (1858). Năm 1925, Heisenberg, Born và Jordan dùng ma trận trong cơ học lượng tử, và từ đó ma trận có mặt ở khắp nơi: đồ hoạ máy tính, xác suất, kinh tế, trí tuệ nhân tạo.
+\end{tcolorbox}
